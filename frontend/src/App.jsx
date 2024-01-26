@@ -1,6 +1,6 @@
 import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import SignUp from './features/auth/components/Signup.jsx';
+import SignUp from './features/auth/components/SignUp.jsx';
 const router = createBrowserRouter([
     {
         path: '/',
