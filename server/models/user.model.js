@@ -67,14 +67,14 @@ schema.pre('save', async function (next) {
     return next();
 });
 
-//* Generate JWT Token
+/* It is used to generate a JSON Web Token (JWT) for authentication purposes. */
 schema.methods.getJWTToken = function () {
     return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
         expiresIn: '15d',
     });
 };
 
-//* Compare the passwords
+/* It is used to compare a given password with the hashed password stored in the user document. */
 schema.methods.comparePassword = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
