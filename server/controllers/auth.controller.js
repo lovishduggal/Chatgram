@@ -39,8 +39,18 @@ const handleLogin = catchAsyncError(async (req, res, next) => {
     const token = user.getJWTToken();
     return res.status(200).cookie('jwt', token, options).json({
         success: true,
-        message: 'Logged In successfully',
+        message: 'Logged In Successfully',
     });
+});
+
+const handleLogout = catchAsyncError(async (req, res, next) => {
+    return res
+        .status(200)
+        .clearCookie('jwt', { ...options, expires: new Date(Date.now()) })
+        .json({
+            success: true,
+            message: 'Logged Out Successfully',
+        });
 });
 
 const handleCheck = catchAsyncError(async (req, res, next) => {
@@ -51,4 +61,4 @@ const handleCheck = catchAsyncError(async (req, res, next) => {
     });
 });
 
-export { handleSignUp, handleLogin, handleCheck };
+export { handleSignUp, handleLogin, handleCheck, handleLogout };

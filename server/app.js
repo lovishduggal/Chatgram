@@ -3,7 +3,9 @@ import { config } from 'dotenv';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import authRouter from './routes/auth.route.js';
+import userRouter from './routes/user.route.js';
 import { ErrorMiddleware } from './middlewares/Error.js';
+import { isAuthenticated } from './middlewares/auth.js';
 const app = express();
 
 //* Loads environment variables from a .env file into process.env.
@@ -19,7 +21,7 @@ app.use(morgan('dev'));
 
 //* Routes
 app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/user', isAuthenticated, userRouter);
 
 app.get('/', (req, res) => {
     return res.send('<h1>Server is working!!</h1>');

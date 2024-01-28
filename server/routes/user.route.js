@@ -1,7 +1,11 @@
 import { Router } from 'express';
-import { handleFollow } from '../controllers/user.controller';
+import {
+    handleFollow,
+    handleUnfollow,
+} from '../controllers/user.controller.js';
 const router = Router();
 
-router.post('/:id/follow', handleFollow);
+router.post('/follow/:id', handleFollow);
+router.post('/unfollow/:id', handleUnfollow);
 
 export default router;
