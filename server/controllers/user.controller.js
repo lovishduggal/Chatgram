@@ -5,7 +5,7 @@ import ErrorHandler from '../utils/customErrorClass.js';
 const handleFollow = catchAsyncError(async (req, res, next) => {
     const follower = req.user; // Current user.
     const followerId = req.user._id; // Current user.
-    const followedId = req.params.id; // Get ID of user to follow.
+    const followedId = req.params.userId; // Get ID of user to follow.
 
     // Check if already following
     if (follower.following.includes(followedId)) {
@@ -27,7 +27,7 @@ const handleFollow = catchAsyncError(async (req, res, next) => {
 const handleUnfollow = catchAsyncError(async (req, res, next) => {
     const follower = req.user; // Current user.
     const followerId = req.user._id; // Current user.
-    const followedId = req.params.id; // Get ID of user to follow.
+    const followedId = req.params.userId; // Get ID of user to follow.
 
     // Check if already following
     if (!follower.following.includes(followedId)) {
@@ -45,4 +45,24 @@ const handleUnfollow = catchAsyncError(async (req, res, next) => {
         .status(200)
         .json({ success: true, message: 'Successfully unfollowed' });
 });
-export { handleFollow, handleUnfollow };
+
+const handleGetUserProfile = catchAsyncError(async (req, res, next) => {
+    const userId = req.params.userId;
+    const user = await User.findById(userId); // .populate('posts') will do later...
+    if (!user) {
+        return next(new ErrorHandler('User not found', 400));
+    }
+
+    return res.status(200).json({ success: true, user });
+});
+
+const handleUpdateUserProfile = catchAsyncError(async (req, res, next) => {
+    console.log(req.file);
+    return res.status(200).json({ success: true, file: req.file });
+});
+export {
+    handleFollow,
+    handleUnfollow,
+    handleGetUserProfile,
+    handleUpdateUserProfile,
+};
