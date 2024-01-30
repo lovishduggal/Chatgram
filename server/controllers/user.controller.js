@@ -1,6 +1,7 @@
 import { catchAsyncError } from '../middlewares/catchAsyncError.js';
 import { User } from '../models/user.model.js';
 import ErrorHandler from '../utils/customErrorClass.js';
+import * as cloudinary from 'cloudinary';
 
 const handleFollow = catchAsyncError(async (req, res, next) => {
     const follower = req.user; // Current user.
@@ -57,8 +58,29 @@ const handleGetUserProfile = catchAsyncError(async (req, res, next) => {
 });
 
 const handleUpdateUserProfile = catchAsyncError(async (req, res, next) => {
-    console.log(req.file);
-    return res.status(200).json({ success: true, file: req.file });
+    const userId = req.user._id;
+    const { name, bio } = req.body;
+
+    const user = await User.findOne({ _id: userId });
+    if (!user) return next(new ErrorHandler('User not found', 400));
+
+    if (name) user.name = name;
+    if (bio) user.bio = bio;
+
+    if (user.profilePicture.public_id && user.profilePicture.url)
+        await cloudinary.v2.uploader.destroy(user.profilePicture.public_id, {
+            resource_type: 'image',
+        });
+    if (req.file) {
+        user.profilePicture.public_id = req.file.filename;
+        user.profilePicture.url = req.file.path;
+    }
+
+    await user.save();
+
+    return res
+        .status(200)
+        .json({ success: true, message: 'Profile updated successfully', user });
 });
 export {
     handleFollow,
