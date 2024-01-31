@@ -49,7 +49,13 @@ const handleUnfollow = catchAsyncError(async (req, res, next) => {
 
 const handleGetUserProfile = catchAsyncError(async (req, res, next) => {
     const userId = req.params.userId;
-    const user = await User.findById(userId); // .populate('posts') will do later...
+    const user = await User.findById(userId).populate({
+        path: 'posts',
+        options: {
+            select: 'image',
+            sort: { createdAt: -1 }, // Sort by creation date (newest first)
+        },
+    }); // .populate('posts') will do later...
     if (!user) {
         return next(new ErrorHandler('User not found', 400));
     }

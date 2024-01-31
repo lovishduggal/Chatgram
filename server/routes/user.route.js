@@ -11,6 +11,6 @@ const router = Router();
 router.get('/:userId', handleGetUserProfile);
 router.post('/follow/:userId', handleFollow);
 router.post('/unfollow/:userId', handleUnfollow);
-router.post('/me', upload.single('image'), handleUpdateUserProfile);
+router.put('/me', upload.single('image'), handleUpdateUserProfile);
 
 export default router;
