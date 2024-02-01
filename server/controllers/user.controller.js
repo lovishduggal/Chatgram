@@ -22,7 +22,7 @@ const handleFollow = catchAsyncError(async (req, res, next) => {
     await User.findByIdAndUpdate(followedId, {
         $push: { followers: followerId },
     });
-    return res.status(200).json({ message: 'Successfully followed' });
+    return res.status(200).json({ success: true });
 });
 
 const handleUnfollow = catchAsyncError(async (req, res, next) => {
@@ -42,9 +42,7 @@ const handleUnfollow = catchAsyncError(async (req, res, next) => {
     await User.findByIdAndUpdate(followedId, {
         $pull: { followers: followerId },
     });
-    return res
-        .status(200)
-        .json({ success: true, message: 'Successfully unfollowed' });
+    return res.status(200).json({ success: true });
 });
 
 const handleGetUserProfile = catchAsyncError(async (req, res, next) => {

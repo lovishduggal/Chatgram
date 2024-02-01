@@ -10,7 +10,7 @@ const handleUploadPost = catchAsyncError(async (req, res) => {
         ? { public_id: req.file.filename, url: req.file.path }
         : null;
 
-    const newPost = await Post.create({
+    const post = await Post.create({
         content,
         image,
         user: userId,
@@ -23,16 +23,74 @@ const handleUploadPost = catchAsyncError(async (req, res) => {
     return res.status(201).json({
         success: true,
         message: 'Post uploaded successfully',
-        post: newPost,
+        post,
     });
 });
 
 const handleGetAllPosts = catchAsyncError(async (req, res, next) => {
     const posts = await Post.find({ deleted: false })
-        .populate('user') // Populate user with user
+        .populate('user') // Populate all info of  user
         .sort({ createdAt: -1 }); // Sort by creation date (newest first)
     return res.status(201).json({
+        success: true,
         posts,
     });
 });
-export { handleUploadPost, handleGetAllPosts };
+
+const handleGetPost = catchAsyncError(async (req, res, next) => {
+    const postId = req.params.id; // Get ID of post
+    const post = await Post.findById(postId).populate('user'); // Populate all user info.
+    //*.populate('comments', 'user'); Populate comment  with user field: will do later.
+    if (!post) {
+        return next(new ErrorHandler('Post not found', 404));
+    }
+    return res.status(200).json({
+        success: true,
+        post,
+    });
+});
+
+const handleUpdatePost = catchAsyncError(async (req, res, next) => {
+    const postId = req.params.id; // Get ID of post
+    const { content } = req.body;
+    const updatedPost = await Post.findByIdAndUpdate(
+        postId,
+        {
+            content,
+            image: {
+                public_id: this.image.public_id,
+                url: this.image.secure_url,
+            },
+        },
+        { new: true }
+    );
+    if (!updatedPost) {
+        return next(new ErrorHandler('Post not found', 404));
+    }
+    return res.status(200).json({
+        success: true,
+        message: 'Post updated successfully',
+        updatedPost,
+    });
+});
+
+const handleDeletePost = catchAsyncError(async (req, res, next) => {
+    const postId = req.params.id; // Get ID of post
+    const post = await Post.findByIdAndUpdate(postId, {
+        deleted: true,
+    });
+    if (!post) {
+        return next(new ErrorHandler('Post not found', 404));
+    }
+    return res.status(200).json({
+        success: true,
+        message: 'Post deleted successfully',
+    });
+});
+export {
+    handleUploadPost,
+    handleGetAllPosts,
+    handleGetPost,
+    handleUpdatePost,
+    handleDeletePost,
+};
