@@ -10,7 +10,7 @@ const handleUploadPost = catchAsyncError(async (req, res) => {
         ? { public_id: req.file.filename, url: req.file.path }
         : null;
 
-    const post = await Post.create({
+    const newPost = await Post.create({
         content,
         image,
         user: userId,
@@ -23,7 +23,7 @@ const handleUploadPost = catchAsyncError(async (req, res) => {
     return res.status(201).json({
         success: true,
         message: 'Post uploaded successfully',
-        post,
+        newPost,
     });
 });
 
@@ -39,8 +39,9 @@ const handleGetAllPosts = catchAsyncError(async (req, res, next) => {
 
 const handleGetPost = catchAsyncError(async (req, res, next) => {
     const postId = req.params.id; // Get ID of post
-    const post = await Post.findById(postId).populate('user'); // Populate all user info.
-    //*.populate('comments', 'user'); Populate comment  with user field: will do later.
+    const post = await Post.findById(postId)
+        .populate('user')
+        .populate('comments'); // Populate all user and comments info.
     if (!post) {
         return next(new ErrorHandler('Post not found', 404));
     }
@@ -53,14 +54,11 @@ const handleGetPost = catchAsyncError(async (req, res, next) => {
 const handleUpdatePost = catchAsyncError(async (req, res, next) => {
     const postId = req.params.id; // Get ID of post
     const { content } = req.body;
+    console.log(content, postId);
     const updatedPost = await Post.findByIdAndUpdate(
         postId,
         {
             content,
-            image: {
-                public_id: this.image.public_id,
-                url: this.image.secure_url,
-            },
         },
         { new: true }
     );
