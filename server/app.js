@@ -6,7 +6,8 @@ import authRouter from './routes/auth.route.js';
 import userRouter from './routes/user.route.js';
 import postRouter from './routes/post.route.js';
 import commentRouter from './routes/comment.route.js';
-import { ErrorMiddleware } from './middlewares/Error.js';
+import likeRouter from './routes/like.route.js';
+import { ErrorMiddleware } from './middlewares/error.js';
 import { isAuthenticated } from './middlewares/auth.js';
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/user', isAuthenticated, userRouter);
 app.use('/api/v1/post', isAuthenticated, postRouter);
 app.use('/api/v1/comment', isAuthenticated, commentRouter);
+app.use('/api/v1/like', isAuthenticated, likeRouter);
 
 app.get('/', (req, res) => {
     return res.send('<h1>Server is working!!</h1>');

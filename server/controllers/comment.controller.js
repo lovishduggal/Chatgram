@@ -37,7 +37,7 @@ const handleGetAllComments = catchAsyncError(async (req, res) => {
 });
 
 const handleUpdateComment = catchAsyncError(async (req, res, next) => {
-    const postId = req.params.id; // Get ID of the post
+    const postId = req.params.postId; // Get ID of the post
     const commentId = req.params.commentId; // Get ID of the comment
     const { content } = req.body;
     const updatedComment = await Comment.findByIdAndUpdate(
@@ -45,7 +45,8 @@ const handleUpdateComment = catchAsyncError(async (req, res, next) => {
         { content },
         { new: true }
     );
-    if (!updatedComment || !(updatedComment.post.toString() !== postId)) {
+    console.log(postId, updatedComment, commentId);
+    if (!updatedComment || updatedComment.post.toString() !== postId) {
         // Ensure comment belongs to post
         return next(new ErrorHandler('Comment not found', 404));
     }
