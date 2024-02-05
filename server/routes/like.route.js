@@ -1,6 +1,10 @@
 import { Router } from 'express';
-import { handleAddLike } from '../controllers/like.controller.js';
+import {
+    handleLikePost,
+    handleUnLikePost,
+} from '../controllers/like.controller.js';
 const router = Router();
 
-router.post('/:postId', handleAddLike);
+router.post('/:postId', handleLikePost);
+router.delete('/:postId', handleUnLikePost);
 export default router;
