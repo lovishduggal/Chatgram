@@ -3,8 +3,8 @@ import { Like } from '../models/like.model.js';
 import { Post } from '../models/post.model.js';
 import ErrorHandler from '../utils/customErrorClass.js';
 const handleLikePost = catchAsyncError(async (req, res, next) => {
-    const userId = req.user._id;
-    const postId = req.params.postId;
+    const userId = req.user._id; // Get ID of the current post
+    const postId = req.params.postId; // Get ID of the post
 
     const existingPost = await Post.findById(postId);
     if (!existingPost) {
@@ -45,7 +45,7 @@ const handleUnLikePost = catchAsyncError(async (req, res, next) => {
     await existingPost.updateOne({ $pull: { likes: alreadyLiked._id } });
     await alreadyLiked.deleteOne();
 
-    return res.status(201).json({
+    return res.status(200).json({
         success: true,
     });
 });

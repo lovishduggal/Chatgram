@@ -7,8 +7,8 @@ import {
 } from '../controllers/comment.controller.js';
 const router = Router();
 
-router.get('/:id', handleGetAllComments);
-router.post('/:id', handleCreateComment);
-router.put('/:postId/comments/:commentId', handleUpdateComment);
-router.delete('/:postId/comments/:commentId', handleDeleteComment);
+router.get('/:postId', handleGetAllComments);
+router.post('/:postId', handleCreateComment);
+router.put('/:postId/:commentId', handleUpdateComment);
+router.delete('/:postId/:commentId', handleDeleteComment);
 export default router;

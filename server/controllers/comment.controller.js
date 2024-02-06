@@ -4,8 +4,8 @@ import { Post } from '../models/post.model.js';
 import ErrorHandler from '../utils/customErrorClass.js';
 
 const handleCreateComment = catchAsyncError(async (req, res, next) => {
-    const postId = req.params.id; // Get ID of the post
-    const userId = req.user._id; // Get ID of current user2222
+    const postId = req.params.postId; // Get ID of the post
+    const userId = req.user._id; // Get ID of current user
     const { content } = req.body;
 
     const existingPost = await Post.findById(postId);
@@ -28,7 +28,7 @@ const handleCreateComment = catchAsyncError(async (req, res, next) => {
 });
 
 const handleGetAllComments = catchAsyncError(async (req, res) => {
-    const postId = req.params.id; // Get ID of the post
+    const postId = req.params.postId; // Get ID of the post
     const comments = await Comment.find({ post: postId }).populate('user'); // Populate all info of user
     return res.status(200).json({
         success: true,
@@ -45,7 +45,6 @@ const handleUpdateComment = catchAsyncError(async (req, res, next) => {
         { content },
         { new: true }
     );
-    console.log(postId, updatedComment, commentId);
     if (!updatedComment || updatedComment.post.toString() !== postId) {
         // Ensure comment belongs to post
         return next(new ErrorHandler('Comment not found', 404));

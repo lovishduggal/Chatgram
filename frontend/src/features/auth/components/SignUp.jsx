@@ -1,4 +1,3 @@
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -7,7 +6,6 @@ import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Stack } from '@mui/material';
@@ -42,10 +40,7 @@ function SignUp() {
             sx={{ height: '100vh' }}
             alignItems={'center'}
             justifyContent={'center'}>
-            <Typography variant="h3" component={'h1'} mb={'1rem'}>
-                Chatgram
-            </Typography>
-            <Container component="main" maxWidth="xs" mt="0">
+            <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <Box
                     sx={{
@@ -54,9 +49,22 @@ function SignUp() {
                         flexDirection: 'column',
                         alignItems: 'center',
                     }}>
-                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                        <LockOutlinedIcon />
-                    </Avatar>
+                    <Typography
+                        variant="h3"
+                        mb={'2rem'}
+                        component={'h1'}
+                        fontStyle={'italic'}
+                        fontWeight={'700'}
+                        fontFamily={'Dancing Script'}>
+                        Pictogram
+                    </Typography>
+                    <Box
+                        src="/logo.png"
+                        alt="logo"
+                        sx={{ width: 50, height: 50 }}
+                        component={'img'}
+                    />
+
                     <Typography component="h1" variant="h5">
                         Sign up
                     </Typography>
