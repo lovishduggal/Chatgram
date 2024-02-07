@@ -1,15 +1,13 @@
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Stack } from '@mui/material';
-
+import { Link, Navigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 function Copyright(props) {
     return (
         <Typography
@@ -18,7 +16,7 @@ function Copyright(props) {
             align="center"
             {...props}>
             {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
+            <Link id="router-link" to="https://mui.com/" sx={{}}>
                 Your Website
             </Link>{' '}
             {new Date().getFullYear()}
@@ -27,14 +25,12 @@ function Copyright(props) {
     );
 }
 function SignUp() {
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
-    };
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm();
+
     return (
         <Stack
             sx={{ height: '100vh' }}
@@ -44,7 +40,6 @@ function SignUp() {
                 <CssBaseline />
                 <Box
                     sx={{
-                        marginTop: 8,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -53,7 +48,6 @@ function SignUp() {
                         variant="h3"
                         mb={'2rem'}
                         component={'h1'}
-                        fontStyle={'italic'}
                         fontWeight={'700'}
                         fontFamily={'Dancing Script'}>
                         Pictogram
@@ -62,69 +56,74 @@ function SignUp() {
                         src="/logo.png"
                         alt="logo"
                         sx={{ width: 50, height: 50 }}
-                        component={'img'}
+                        component="img"
                     />
-
                     <Typography component="h1" variant="h5">
                         Sign up
                     </Typography>
                     <Box
                         component="form"
                         noValidate
-                        onSubmit={handleSubmit}
+                        onSubmit={handleSubmit((data) => {
+                            console.log(data);
+                        })}
                         sx={{ mt: 3 }}>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12}>
                                 <TextField
                                     autoComplete="given-name"
-                                    name="firstName"
-                                    required
+                                    {...register('fullName', {
+                                        required: 'Full Name is required',
+                                    })}
+                                    error={
+                                        errors?.fullName?.message ? true : false
+                                    }
+                                    helperText={errors?.fullName?.message}
                                     fullWidth
-                                    id="firstName"
-                                    label="First Name"
+                                    id="fullName"
+                                    label="Full Name"
                                     autoFocus
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    id="lastName"
-                                    label="Last Name"
-                                    name="lastName"
-                                    autoComplete="family-name"
-                                />
-                            </Grid>
                             <Grid item xs={12}>
                                 <TextField
-                                    required
                                     fullWidth
                                     id="email"
                                     label="Email Address"
-                                    name="email"
                                     autoComplete="email"
+                                    {...register('email', {
+                                        required: 'Email is required',
+                                        pattern: {
+                                            value: /^\S+@\S+\.\S+$/,
+                                            message:
+                                                'Email address is not valid',
+                                        },
+                                    })}
+                                    error={
+                                        errors?.email?.message ? true : false
+                                    }
+                                    helperText={errors?.email?.message}
                                 />
                             </Grid>
                             <Grid item xs={12}>
                                 <TextField
-                                    required
                                     fullWidth
-                                    name="password"
+                                    {...register('password', {
+                                        required: 'Password is required',
+                                        pattern: {
+                                            value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$/,
+                                            message:
+                                                'Minimum eight and maximum 10 characters, at least one uppercase letter, one lowercase letter, one number and one special character',
+                                        },
+                                    })}
+                                    error={
+                                        errors?.password?.message ? true : false
+                                    }
+                                    helperText={errors?.password?.message}
                                     label="Password"
                                     type="password"
                                     id="password"
                                     autoComplete="new-password"
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            value="allowExtraEmails"
-                                            color="primary"
-                                        />
-                                    }
-                                    label="I want to receive inspiration, marketing promotions and updates via email."
                                 />
                             </Grid>
                         </Grid>
@@ -137,7 +136,10 @@ function SignUp() {
                         </Button>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
-                                <Link href="#" variant="body2">
+                                <Link
+                                    id="router-link"
+                                    to="/login"
+                                    variant="body2">
                                     Already have an account? Sign in
                                 </Link>
                             </Grid>

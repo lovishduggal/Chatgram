@@ -11,3 +11,10 @@ body,
     box-sizing: border-box;
     font-family: 'Roboto', sans-serif;
 }
+#router-link {
+    color: #e43d90;
+    text-decoration: none;
+}
+#router-link:hover {
+    text-decoration: underline;
+}
