@@ -6,8 +6,10 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Stack } from '@mui/material';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { signup } from '../authSlice';
 function Copyright(props) {
     return (
         <Typography
@@ -16,7 +18,7 @@ function Copyright(props) {
             align="center"
             {...props}>
             {'Copyright © '}
-            <Link id="router-link" to="https://mui.com/" sx={{}}>
+            <Link id="router-link" to="https://t.co/tHBDZAWKvl" target="_blank">
                 Your Website
             </Link>{' '}
             {new Date().getFullYear()}
@@ -29,7 +31,20 @@ function SignUp() {
         register,
         handleSubmit,
         formState: { errors },
+        reset,
     } = useForm();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    async function handleSignUp(data) {
+        const {
+            payload: { success },
+        } = await dispatch(signup(data));
+        if (success) {
+            navigate('/login');
+            return reset();
+        }
+    }
 
     return (
         <Stack
@@ -64,9 +79,7 @@ function SignUp() {
                     <Box
                         component="form"
                         noValidate
-                        onSubmit={handleSubmit((data) => {
-                            console.log(data);
-                        })}
+                        onSubmit={handleSubmit((data) => handleSignUp(data))}
                         sx={{ mt: 3 }}>
                         <Grid container spacing={2}>
                             <Grid item xs={12}>

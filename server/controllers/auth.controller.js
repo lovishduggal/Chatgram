@@ -9,17 +9,17 @@ const options = {
 };
 
 const handleSignUp = catchAsyncError(async (req, res, next) => {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password)
+    const { fullName, email, password } = req.body;
+    if (!fullName || !email || !password)
         return next(new ErrorHandler('Please provide all fields', 400));
 
     let user = await User.findOne({ email });
     if (user) return next(new ErrorHandler('User already exists', 400));
-    user = await User.create({ name, email, password });
+    user = await User.create({ fullName, email, password });
 
     return res.status(200).json({
         success: true,
-        message: 'User registered successfully',
+        message: 'Sign Up successfully',
     });
 });
 

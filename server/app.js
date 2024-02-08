@@ -9,6 +9,8 @@ import commentRouter from './routes/comment.route.js';
 import likeRouter from './routes/like.route.js';
 import { ErrorMiddleware } from './middlewares/error.js';
 import { isAuthenticated } from './middlewares/auth.js';
+import cors from 'cors';
+
 const app = express();
 
 //* Loads environment variables from a .env file into process.env.
@@ -16,7 +18,14 @@ config({
     path: '.env',
 });
 
-//* Middleware for parsing JSON, URL-encoded data, cookies and logging HTTP requests.
+//* Middleware for handling CORS, JSON, URL-encoded data, cookies and logging HTTP requests.
+app.use(
+    cors({
+        origin: process.env.FRONTEND_URL,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
