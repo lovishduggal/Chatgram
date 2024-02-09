@@ -9,7 +9,7 @@ import { Stack } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
-import { signup } from '../authSlice';
+import { login } from '../authSlice';
 function Copyright(props) {
     return (
         <Typography
@@ -26,7 +26,7 @@ function Copyright(props) {
         </Typography>
     );
 }
-function SignUp() {
+function LogIn() {
     const {
         register,
         handleSubmit,
@@ -36,12 +36,12 @@ function SignUp() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    async function handleSignUp(data) {
+    async function handleLogIn(data) {
         const {
             payload: { success },
-        } = await dispatch(signup(data));
+        } = await dispatch(login(data));
         if (success) {
-            navigate('/login');
+            navigate('/');
             return reset();
         }
     }
@@ -67,36 +67,12 @@ function SignUp() {
                         fontFamily={'Dancing Script'}>
                         Pictogram
                     </Typography>
-
-                    <Typography
-                        component="h4"
-                        variant="subtitle1"
-                        fontWeight={'500'} textAlign={'center'}>
-                        Sign up to see photos and videos <br /> from your
-                        friends.
-                    </Typography>
                     <Box
                         component="form"
                         noValidate
-                        onSubmit={handleSubmit((data) => handleSignUp(data))}
+                        onSubmit={handleSubmit((data) => handleLogIn(data))}
                         sx={{ mt: 3 }}>
                         <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <TextField
-                                    autoComplete="given-name"
-                                    {...register('fullName', {
-                                        required: 'Full Name is required',
-                                    })}
-                                    error={
-                                        errors?.fullName?.message ? true : false
-                                    }
-                                    helperText={errors?.fullName?.message}
-                                    fullWidth
-                                    id="fullName"
-                                    label="Full Name"
-                                    autoFocus
-                                />
-                            </Grid>
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -144,15 +120,23 @@ function SignUp() {
                             fullWidth
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}>
-                            Sign Up
+                            Log In
                         </Button>
-                        <Grid container justifyContent="flex-end">
+                        <Grid container>
+                            <Grid item xs>
+                                <Link
+                                    id="router-link"
+                                    to="/forgot-password"
+                                    variant="body2">
+                                    Forgot password?
+                                </Link>
+                            </Grid>
                             <Grid item>
                                 <Link
                                     id="router-link"
-                                    to="/login"
+                                    to="/signup"
                                     variant="body2">
-                                    Already have an account? Sign in
+                                    {"Don't have an account? Sign Up"}
                                 </Link>
                             </Grid>
                         </Grid>
@@ -164,4 +148,4 @@ function SignUp() {
     );
 }
 
-export default SignUp;
+export default LogIn;

@@ -4,14 +4,19 @@ import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
+import LogInPage from './pages/LogInPage.jsx';
 const router = createBrowserRouter([
+    {
+        path: '/',
+        element: <h1>Home Page</h1>,
+    },
     {
         path: '/signup',
         element: <SignUpPage></SignUpPage>,
     },
     {
         path: '/login',
-        element: <h1>Login</h1>,
+        element: <LogInPage></LogInPage>,
     },
 ]);
 function App() {
