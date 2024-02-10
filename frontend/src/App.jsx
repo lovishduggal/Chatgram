@@ -5,10 +5,19 @@ import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme.jsx';
 import SignUpPage from './pages/SignUpPage.jsx';
 import LogInPage from './pages/LogInPage.jsx';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { checkLoggedIn } from './features/auth/authSlice.js';
+import RequireAuth from './features/auth/components/RequireAuth.jsx';
+
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <h1>Home Page</h1>,
+        element: (
+            <RequireAuth>
+                <h1>Home Page</h1>
+            </RequireAuth>
+        ),
     },
     {
         path: '/signup',
@@ -20,6 +29,11 @@ const router = createBrowserRouter([
     },
 ]);
 function App() {
+    const dispatch = useDispatch();
+    const getloggedInValue = localStorage.getItem('isLoggedIn');
+    useEffect(() => {
+        dispatch(checkLoggedIn({ getloggedInValue }));
+    }, []);
     return (
         <div className="app">
             {' '}
