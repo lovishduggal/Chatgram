@@ -9,13 +9,15 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { checkLoggedIn } from './features/auth/authSlice.js';
 import RequireAuth from './features/auth/components/RequireAuth.jsx';
+import Home from './pages/Home.jsx';
+import CssBaseline from '@mui/material/CssBaseline';
 
 const router = createBrowserRouter([
     {
         path: '/',
         element: (
             <RequireAuth>
-                <h1>Home Page</h1>
+                <Home></Home>
             </RequireAuth>
         ),
     },
@@ -38,6 +40,7 @@ function App() {
         <div className="app">
             {' '}
             <ThemeProvider theme={theme}>
+                <CssBaseline />
                 <RouterProvider router={router} />
                 <Toaster />
             </ThemeProvider>
