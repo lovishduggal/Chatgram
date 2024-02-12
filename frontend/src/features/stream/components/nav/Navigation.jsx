@@ -21,6 +21,9 @@ function Navigation() {
                 bottom: 0,
                 left: 0,
                 right: 0,
+                borderTop: 1,
+                borderColor: 'grey.300',
+                display: { xs: 'block', sm: 'none' },
             }}>
             <Container>
                 <BottomNavigation

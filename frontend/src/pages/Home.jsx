@@ -1,12 +1,14 @@
 import { Grid } from '@mui/material';
-import NavBar from '../features/nav/NavBar';
-import Navigation from '../features/nav/Navigation';
-import Feed from '../features/stream/feed';
+import TopBar from '../features/stream/components/nav/TopBar';
+import Navigation from '../features/stream/components/nav/Navigation';
+import Feed from '../features/stream/components/feed/Feed';
+import LeftNavigation from '../features/stream/components/nav/LeftNavigation';
 
 function Home() {
     return (
         <Grid container>
-            <NavBar></NavBar>
+            <TopBar></TopBar>
+            <LeftNavigation></LeftNavigation>
             <Feed></Feed>
             <Navigation></Navigation>
         </Grid>
