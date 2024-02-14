@@ -11,6 +11,7 @@ import { checkLoggedIn } from './features/auth/authSlice.js';
 import RequireAuth from './features/auth/components/RequireAuth.jsx';
 import Home from './pages/Home.jsx';
 import CssBaseline from '@mui/material/CssBaseline';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 const router = createBrowserRouter([
     {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
     {
         path: '/login',
         element: <LogInPage></LogInPage>,
+    },
+    {
+        path: '/profile',
+        element: <ProfilePage></ProfilePage>,
     },
 ]);
 function App() {
