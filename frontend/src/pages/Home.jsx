@@ -1,10 +1,10 @@
 import NavBar from '../features/nav/NavBar';
-import Post from '../features/post/components/Post';
+import Posts from '../features/post/components/Posts';
 
 function Home() {
     return (
         <NavBar>
-            <Post></Post>
+            <Posts></Posts>
         </NavBar>
     );
 }

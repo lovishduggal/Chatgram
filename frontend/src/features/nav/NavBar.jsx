@@ -7,26 +7,21 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { Container } from '@mui/material';
+import { Container, Link } from '@mui/material';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import { useState } from 'react';
 import { Add, Home, Search, Notifications } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
-import {
-    Link,
-    unstable_HistoryRouter,
-    useLocation,
-    useSearchParams,
-} from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
+import Switcher from './Switcher';
 const drawerWidth = 240;
 
-function ProfileAvatar() {
+function ProfileAvatar({ color }) {
     return (
         <Avatar
-            alt="Remy Sharp"
-            src="/static/images/avatar/1.jpg"
-            sx={{ width: 24, height: 24 }}
+            src="/broken-image.jpg"
+            sx={{ width: 24, height: 24, bgcolor: color }}
         />
     );
 }
@@ -54,6 +49,7 @@ function TopBar() {
                         fontWeight={'700'}>
                         Pictogram
                     </Typography>
+                    <Switcher></Switcher>
                 </Box>
             </Toolbar>
         </AppBar>
@@ -61,11 +57,12 @@ function TopBar() {
 }
 
 function LeftDrawer() {
-    const [selectedIndex, setSelectedIndex] = useState(0);
-
-    const handleListItemClick = (event, index) => {
-        console.log(event, index);
-        setSelectedIndex(index);
+    const location = useLocation();
+    const [value, setValue] = useState(
+        location.pathname === '/' ? 'home' : location.pathname.slice(1)
+    );
+    const handleListItemClick = (event, newValue) => {
+        setValue(newValue);
     };
     const drawer = (
         <div>
@@ -75,46 +72,108 @@ function LeftDrawer() {
                 component="nav"
                 aria-label="main mailbox folders"
                 sx={{ padding: 0 }}>
-                <ListItemButton
-                    selected={selectedIndex === 0}
-                    onClick={(event) => handleListItemClick(event, 0)}>
-                    <ListItemIcon>
-                        <Home />
-                    </ListItemIcon>
-                    <ListItemText primary="Home" />
-                </ListItemButton>
-                <ListItemButton
-                    selected={selectedIndex === 1}
-                    onClick={(event) => handleListItemClick(event, 1)}>
-                    <ListItemIcon>
-                        <Search />
-                    </ListItemIcon>
-                    <ListItemText primary="Search" />
-                </ListItemButton>
-                <ListItemButton
-                    selected={selectedIndex === 2}
-                    onClick={(event) => handleListItemClick(event, 2)}>
-                    <ListItemIcon>
-                        <Add />
-                    </ListItemIcon>
-                    <ListItemText primary="New Post" />
-                </ListItemButton>
-                <ListItemButton
-                    selected={selectedIndex === 3}
-                    onClick={(event) => handleListItemClick(event, 3)}>
-                    <ListItemIcon>
-                        <Notifications />
-                    </ListItemIcon>
-                    <ListItemText primary="Notifications" />
-                </ListItemButton>
-                <ListItemButton
-                    selected={selectedIndex === 4}
-                    onClick={(event) => handleListItemClick(event, 4)}>
-                    <ListItemIcon>
-                        <ProfileAvatar />
-                    </ListItemIcon>
-                    <ListItemText primary="Profile" />
-                </ListItemButton>
+                <Link
+                    component={RouterLink}
+                    to="/"
+                    underline="none"
+                    color={value === 'home' ? 'primary' : 'inherit'}>
+                    <ListItemButton
+                        selected={value === 'home'}
+                        onClick={(event) => handleListItemClick(event, 'home')}>
+                        <ListItemIcon>
+                            <Home
+                                color={value === 'home' ? 'primary' : 'inherit'}
+                            />
+                        </ListItemIcon>
+                        <ListItemText primary="Home" />
+                    </ListItemButton>
+                </Link>
+                <Link
+                    component={RouterLink}
+                    to="/search"
+                    underline="none"
+                    color={value === 'search' ? 'primary' : 'inherit'}>
+                    <ListItemButton
+                        selected={value === 'search'}
+                        onClick={(event) =>
+                            handleListItemClick(event, 'search')
+                        }>
+                        <ListItemIcon>
+                            <Search
+                                color={
+                                    value === 'search' ? 'primary' : 'inherit'
+                                }
+                            />
+                        </ListItemIcon>
+                        <ListItemText primary="Search" />
+                    </ListItemButton>
+                </Link>
+                <Link
+                    component={RouterLink}
+                    to="/create-post"
+                    underline="none"
+                    color={value === 'create-post' ? 'primary' : 'inherit'}>
+                    <ListItemButton
+                        selected={value === 'create-post'}
+                        onClick={(event) =>
+                            handleListItemClick(event, 'create-post')
+                        }>
+                        <ListItemIcon>
+                            <Add
+                                color={
+                                    value === 'create-post'
+                                        ? 'primary'
+                                        : 'inherit'
+                                }
+                            />
+                        </ListItemIcon>
+                        <ListItemText primary="New Post" />
+                    </ListItemButton>
+                </Link>
+                <Link
+                    component={RouterLink}
+                    to="/notifications"
+                    underline="none"
+                    color={value === 'notifications' ? 'primary' : 'inherit'}>
+                    <ListItemButton
+                        selected={value === 'notifications'}
+                        onClick={(event) =>
+                            handleListItemClick(event, 'notifications')
+                        }>
+                        <ListItemIcon>
+                            <Notifications
+                                color={
+                                    value === 'notifications'
+                                        ? 'primary'
+                                        : 'inherit'
+                                }
+                            />
+                        </ListItemIcon>
+                        <ListItemText primary="Notifications" />
+                    </ListItemButton>
+                </Link>
+                <Link
+                    component={RouterLink}
+                    to="/profile"
+                    underline="none"
+                    color={value === 'profile' ? 'primary' : 'inherit'}>
+                    <ListItemButton
+                        selected={value === 'profile'}
+                        onClick={(event) =>
+                            handleListItemClick(event, 'profile')
+                        }>
+                        <ListItemIcon>
+                            <ProfileAvatar
+                                color={
+                                    value === 'profile'
+                                        ? 'primary.main'
+                                        : 'default'
+                                }
+                            />
+                        </ListItemIcon>
+                        <ListItemText primary="Profile" />
+                    </ListItemButton>
+                </Link>
             </List>
         </div>
     );
@@ -146,8 +205,6 @@ function BottomNav() {
     const [value, setValue] = useState(
         location.pathname === '/' ? 'home' : location.pathname.slice(1)
     );
-
-    console.log(location.pathname);
     const handleChange = (event, newValue) => {
         console.log(event, newValue);
         setValue(newValue);
@@ -172,31 +229,49 @@ function BottomNav() {
                     value={value}
                     onChange={handleChange}>
                     <BottomNavigationAction
+                        component={RouterLink}
+                        to="/"
                         label="Home"
                         value="home"
                         icon={<Home />}
                         alt="Home"
                     />
                     <BottomNavigationAction
+                        component={RouterLink}
+                        to="/search"
                         label="Search"
                         value="search"
                         icon={<Search />}
                     />
                     <BottomNavigationAction
+                        component={RouterLink}
+                        to="/create-post"
                         label="New Post"
-                        value="newPost"
+                        value="create-post"
                         icon={<Add />}
                     />
                     <BottomNavigationAction
+                        component={RouterLink}
+                        to="/notifications"
                         label="Notification"
-                        value="notification"
+                        value="notifications"
                         icon={<Notifications />}
                     />
 
                     <BottomNavigationAction
+                        component={RouterLink}
+                        to="/profile"
                         label="Profile"
                         value="profile"
-                        icon={<ProfileAvatar />}
+                        icon={
+                            <ProfileAvatar
+                                color={
+                                    value === 'profile'
+                                        ? 'primary.main'
+                                        : 'gray'
+                                }
+                            />
+                        }
                     />
                 </BottomNavigation>
             </Container>
