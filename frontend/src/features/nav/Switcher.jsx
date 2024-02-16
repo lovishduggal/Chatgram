@@ -59,7 +59,7 @@ function Switcher() {
     }
     return (
         <FormControlLabel
-            sx={{ position: 'fixed', right: 0, top: 10, m: 0 }}
+            sx={{ position: 'fixed', right: 0, top: 5, m: 0 }}
             control={
                 <MaterialUISwitch
                     sx={{ m: 1 }}

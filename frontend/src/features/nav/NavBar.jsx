@@ -15,13 +15,15 @@ import { Add, Home, Search, Notifications } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import Switcher from './Switcher';
-const drawerWidth = 240;
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+const drawerWidth = 235;
 
 function ProfileAvatar({ color }) {
     return (
-        <Avatar
-            src="/broken-image.jpg"
-            sx={{ width: 24, height: 24, bgcolor: color }}
+        <AccountCircleIcon
+            sx={{
+                color,
+            }}
         />
     );
 }
@@ -29,28 +31,30 @@ function ProfileAvatar({ color }) {
 function TopBar() {
     return (
         <AppBar
-            color="inherit"
+            color="transparent"
             position="fixed"
             sx={{
                 boxShadow: 'none',
                 borderBottom: 1,
-                borderColor: 'grey.300',
-                zIndex: 9999,
+                borderColor: 'text.primary',
+                bgcolor: 'background.default',
+                flexGrow: 1,
+                width: { sm: `calc(100% - ${drawerWidth}px)` },
             }}
             enableColorOnDark>
-            <Toolbar>
-                <Box>
-                    {' '}
-                    <Typography
-                        variant="h4"
-                        noWrap
-                        component="div"
-                        fontFamily={'Dancing Script'}
-                        fontWeight={'700'}>
-                        Pictogram
-                    </Typography>
-                    <Switcher></Switcher>
-                </Box>
+            <Toolbar sx={{ justifyContent: 'center' }}>
+                {' '}
+                <Typography
+                    variant="h4"
+                    noWrap
+                    component="div"
+                    fontFamily={'Dancing Script'}
+                    fontWeight={'700'}
+                    textAlign={'center'}
+                    paddingX={'10px'}>
+                    Pictogram
+                </Typography>
+                <Switcher></Switcher>
             </Toolbar>
         </AppBar>
     );
@@ -66,9 +70,12 @@ function LeftDrawer() {
     };
     const drawer = (
         <div>
-            <Toolbar />
-
+            <Toolbar sx={{ justifyContent: 'center' }}>
+                <Avatar src={'/logo.png'}></Avatar>
+            </Toolbar>
             <List
+                bgcolor={'background.default'}
+                color={'text.primary'}
                 component="nav"
                 aria-label="main mailbox folders"
                 sx={{ padding: 0 }}>
@@ -76,13 +83,19 @@ function LeftDrawer() {
                     component={RouterLink}
                     to="/"
                     underline="none"
-                    color={value === 'home' ? 'primary' : 'inherit'}>
+                    color={value === 'home' ? 'primary.main' : 'text.primary'}>
                     <ListItemButton
                         selected={value === 'home'}
                         onClick={(event) => handleListItemClick(event, 'home')}>
                         <ListItemIcon>
                             <Home
-                                color={value === 'home' ? 'primary' : 'inherit'}
+                                sx={{
+                                    color: `${
+                                        value === 'home'
+                                            ? 'primary.main'
+                                            : 'text.primary'
+                                    }`,
+                                }}
                             />
                         </ListItemIcon>
                         <ListItemText primary="Home" />
@@ -92,7 +105,7 @@ function LeftDrawer() {
                     component={RouterLink}
                     to="/search"
                     underline="none"
-                    color={value === 'search' ? 'primary' : 'inherit'}>
+                    color={value === 'search' ? 'primary' : 'text.primary'}>
                     <ListItemButton
                         selected={value === 'search'}
                         onClick={(event) =>
@@ -100,9 +113,13 @@ function LeftDrawer() {
                         }>
                         <ListItemIcon>
                             <Search
-                                color={
-                                    value === 'search' ? 'primary' : 'inherit'
-                                }
+                                sx={{
+                                    color: `${
+                                        value === 'search'
+                                            ? 'primary.main'
+                                            : 'text.primary'
+                                    }`,
+                                }}
                             />
                         </ListItemIcon>
                         <ListItemText primary="Search" />
@@ -112,7 +129,9 @@ function LeftDrawer() {
                     component={RouterLink}
                     to="/create-post"
                     underline="none"
-                    color={value === 'create-post' ? 'primary' : 'inherit'}>
+                    color={
+                        value === 'create-post' ? 'primary' : 'text.primary'
+                    }>
                     <ListItemButton
                         selected={value === 'create-post'}
                         onClick={(event) =>
@@ -120,11 +139,13 @@ function LeftDrawer() {
                         }>
                         <ListItemIcon>
                             <Add
-                                color={
-                                    value === 'create-post'
-                                        ? 'primary'
-                                        : 'inherit'
-                                }
+                                sx={{
+                                    color: `${
+                                        value === 'create-post'
+                                            ? 'primary.main'
+                                            : 'text.primary'
+                                    }`,
+                                }}
                             />
                         </ListItemIcon>
                         <ListItemText primary="New Post" />
@@ -134,7 +155,11 @@ function LeftDrawer() {
                     component={RouterLink}
                     to="/notifications"
                     underline="none"
-                    color={value === 'notifications' ? 'primary' : 'inherit'}>
+                    color={
+                        value === 'notifications'
+                            ? 'primary.main'
+                            : 'text.primary'
+                    }>
                     <ListItemButton
                         selected={value === 'notifications'}
                         onClick={(event) =>
@@ -142,11 +167,13 @@ function LeftDrawer() {
                         }>
                         <ListItemIcon>
                             <Notifications
-                                color={
-                                    value === 'notifications'
-                                        ? 'primary'
-                                        : 'inherit'
-                                }
+                                sx={{
+                                    color: `${
+                                        value === 'notifications'
+                                            ? 'primary.main'
+                                            : 'text.primary'
+                                    }`,
+                                }}
                             />
                         </ListItemIcon>
                         <ListItemText primary="Notifications" />
@@ -156,7 +183,9 @@ function LeftDrawer() {
                     component={RouterLink}
                     to="/profile"
                     underline="none"
-                    color={value === 'profile' ? 'primary' : 'inherit'}>
+                    color={
+                        value === 'profile' ? 'primary.main' : 'text.primary'
+                    }>
                     <ListItemButton
                         selected={value === 'profile'}
                         onClick={(event) =>
@@ -167,7 +196,7 @@ function LeftDrawer() {
                                 color={
                                     value === 'profile'
                                         ? 'primary.main'
-                                        : 'default'
+                                        : 'text.primary'
                                 }
                             />
                         </ListItemIcon>
@@ -181,7 +210,10 @@ function LeftDrawer() {
     return (
         <Box
             component="nav"
-            sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+            sx={{
+                width: { sm: drawerWidth },
+                flexShrink: { sm: 0 },
+            }}
             aria-label="mailbox folders">
             <Drawer
                 variant="permanent"
@@ -190,7 +222,10 @@ function LeftDrawer() {
                     '& .MuiDrawer-paper': {
                         boxSizing: 'border-box',
                         width: drawerWidth,
+                        borderColor: 'text.primary',
                     },
+                    border: 10,
+                    borderColor: 'text.primary',
                 }}
                 open>
                 {drawer}
@@ -211,6 +246,8 @@ function BottomNav() {
     };
     return (
         <Box
+            bgcolor={'background.default'}
+            color={'text.primary'}
             sx={{
                 width: 1,
                 position: 'fixed',
@@ -218,7 +255,7 @@ function BottomNav() {
                 left: 0,
                 right: 0,
                 borderTop: 1,
-                borderColor: 'grey.300',
+                borderColor: 'text.primary',
                 display: { xs: 'block', sm: 'none' },
             }}>
             <Container>
@@ -233,7 +270,17 @@ function BottomNav() {
                         to="/"
                         label="Home"
                         value="home"
-                        icon={<Home />}
+                        icon={
+                            <Home
+                                sx={{
+                                    color: `${
+                                        value === 'home'
+                                            ? 'primary'
+                                            : 'text.primary'
+                                    }`,
+                                }}
+                            />
+                        }
                         alt="Home"
                     />
                     <BottomNavigationAction
@@ -241,21 +288,51 @@ function BottomNav() {
                         to="/search"
                         label="Search"
                         value="search"
-                        icon={<Search />}
+                        icon={
+                            <Search
+                                sx={{
+                                    color: `${
+                                        value === 'search'
+                                            ? 'primary'
+                                            : 'text.primary'
+                                    }`,
+                                }}
+                            />
+                        }
                     />
                     <BottomNavigationAction
                         component={RouterLink}
                         to="/create-post"
                         label="New Post"
                         value="create-post"
-                        icon={<Add />}
+                        icon={
+                            <Add
+                                sx={{
+                                    color: `${
+                                        value === 'create-post'
+                                            ? 'primary'
+                                            : 'text.primary'
+                                    }`,
+                                }}
+                            />
+                        }
                     />
                     <BottomNavigationAction
                         component={RouterLink}
                         to="/notifications"
                         label="Notification"
                         value="notifications"
-                        icon={<Notifications />}
+                        icon={
+                            <Notifications
+                                sx={{
+                                    color: `${
+                                        value === 'notifications'
+                                            ? 'primary'
+                                            : 'text.primary'
+                                    }`,
+                                }}
+                            />
+                        }
                     />
 
                     <BottomNavigationAction
@@ -267,8 +344,8 @@ function BottomNav() {
                             <ProfileAvatar
                                 color={
                                     value === 'profile'
-                                        ? 'primary.main'
-                                        : 'gray'
+                                        ? 'primary'
+                                        : 'text.primary'
                                 }
                             />
                         }
@@ -282,14 +359,16 @@ function BottomNav() {
 function NavBar({ children }) {
     return (
         <>
-            <TopBar></TopBar>
             <Box sx={{ display: 'flex' }}>
+                <TopBar></TopBar>
                 <LeftDrawer></LeftDrawer>
                 <Container
                     component="main"
                     sx={{
                         flexGrow: 1,
-                        width: { sm: `calc(100% - ${drawerWidth}px)` },
+                        width: {
+                            sm: `calc(100% - ${drawerWidth}px)`,
+                        },
                     }}>
                     <Toolbar />
                     {children}

@@ -15,7 +15,7 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import NotificationPage from './pages/NotificationPage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
 import PostPage from './pages/PostPage.jsx';
-import { createTheme } from '@mui/material';
+import { Box, createTheme } from '@mui/material';
 import { selectMode } from './features/user/userSlice.js';
 
 const router = createBrowserRouter([
@@ -64,9 +64,11 @@ function App() {
         <div className="app">
             {' '}
             <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <RouterProvider router={router} />
-                <Toaster />
+                <Box bgcolor={'background.default'} color={'text.primary'}>
+                    <CssBaseline />
+                    <RouterProvider router={router} />
+                    <Toaster />
+                </Box>
             </ThemeProvider>
         </div>
     );
