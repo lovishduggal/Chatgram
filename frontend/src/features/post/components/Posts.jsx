@@ -8,8 +8,6 @@ function Posts() {
             <Post></Post>
             <Post></Post>
             <Post></Post>
-            <Post></Post>
-            <Post></Post>
         </Stack>
     );
 }
