@@ -17,6 +17,7 @@ import SearchPage from './pages/SearchPage.jsx';
 import PostPage from './pages/PostPage.jsx';
 import { Box, createTheme } from '@mui/material';
 import { selectMode } from './features/user/userSlice.js';
+import CreatePostPage from './pages/CreatePostPage.jsx';
 
 const router = createBrowserRouter([
     {
@@ -41,7 +42,7 @@ const router = createBrowserRouter([
     },
     {
         path: '/create-post',
-        element: <PostPage></PostPage>,
+        element: <CreatePostPage></CreatePostPage>,
     },
     {
         path: '/search',

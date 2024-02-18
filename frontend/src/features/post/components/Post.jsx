@@ -10,6 +10,7 @@ import {
     CardMedia,
     Checkbox,
     IconButton,
+    Modal,
     Stack,
     TextField,
     Typography,
@@ -18,20 +19,31 @@ import ModeCommentOutlinedIcon from '@mui/icons-material/ModeCommentOutlined';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListSubheader from '@mui/material/ListSubheader';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const options = ['Edit', 'Delete'];
 const ITEM_HEIGHT = 40;
 
-function MenuLong() {
+function MenuLong({ setIsEditing, setOpenCommentDialog, reset }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
-    const handleClose = () => {
-        console.log('API call');
+    const handleClose = (e) => {
+        console.log('API call', anchorEl, e.currentTarget.dataset.myValue);
+        if (e.currentTarget.dataset.myValue === 'Edit') {
+            setIsEditing(true);
+            setOpenCommentDialog(false);
+            reset();
+        }
+
+        //* I can perform delete operation here directly (API)
         setAnchorEl(null);
     };
 
@@ -66,6 +78,7 @@ function MenuLong() {
                     <MenuItem
                         sx={{ color: 'text.primary' }}
                         key={option}
+                        data-my-value={option}
                         selected={option === 'Pyxis'}
                         onClick={handleClose}>
                         {option}
@@ -76,38 +89,127 @@ function MenuLong() {
     );
 }
 
+function ListOfComments() {
+    return (
+        <List
+            sx={{
+                padding: '0px',
+                width: '100%',
+                maxWidth: 360,
+                bgcolor: 'background.paper',
+                overflowY: 'auto',
+                maxHeight: 400,
+                '& ul': { padding: 0 },
+            }}>
+            <ListSubheader>{`Post's comments`}</ListSubheader>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+            <ListItem key={`1`}>
+                <ListItemText primary={`Item`} />
+            </ListItem>
+        </List>
+    );
+}
+
 function Post() {
     const {
         register,
         handleSubmit,
+        getValues,
         formState: { isDirty, isValid },
         reset,
-    } = useForm({ mode: 'onChange' });
-    console.log(isDirty, isValid);
+    } = useForm();
+    const [isEditing, setIsEditing] = useState(false);
+    const [openCommentDialog, setOpenCommentDialog] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+    const [checked, setChecked] = useState(false);
 
-    function onSubmit(data) {
-        console.log('API call', data);
+    function handleOpen() {
+        setOpenModal(true);
+    }
+    function handleClose() {
+        setOpenModal(false);
+    }
+
+    function handleLike(e) {
+        console.log('Handle like API here', e.target.checked);
+        setChecked(e.target.checked);
+    }
+
+    function handleCommentDialog() {
+        setOpenCommentDialog(!openCommentDialog);
+        setIsEditing(false);
+        reset();
+    }
+
+    function onCancel(data) {
+        console.log('oncancel', data);
+        setIsEditing(false);
+        reset();
+    }
+
+    function handleSubmitted(data) {
+        const { addComment, caption } = data;
+
+        if (addComment) {
+            console.log('comment', data);
+            setOpenCommentDialog(false);
+        } else if (caption) {
+            console.log('caption', data);
+            setIsEditing(false);
+        }
         reset();
     }
 
     return (
         <Card
+            component={'form'}
+            noValidate
+            onSubmit={handleSubmit((data) => handleSubmitted(data))}
             sx={{
                 marginY: 3,
                 maxWidth: '500px',
                 boxShadow: 4,
+                position: 'relative',
             }}>
             <CardHeader
                 avatar={
-                    <Avatar
+                    <Avatar //* Here provide user pic and name
                         sx={{ bgcolor: 'text.primary' }}
                         aria-label="profile-pic">
                         L
                     </Avatar>
                 }
-                action={<MenuLong></MenuLong>}
+                action={
+                    <MenuLong
+                        setIsEditing={setIsEditing}
+                        setOpenCommentDialog={setOpenCommentDialog}
+                        reset={reset}></MenuLong>
+                }
                 title="Lovish Duggal"
-                subheader={new Date().toDateString()}
+                subheader={new Date().toDateString()} //* Here, provide time when post created(use db)
             />
             <CardMedia
                 component="img"
@@ -116,31 +218,66 @@ function Post() {
                 alt="Lovish Duggal" //* Put User name here
             />
             <CardContent>
-                <Typography variant="body2" color="text.secondary">
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Facilis nisi distinctio animi voluptate tempore consequatur
-                    totam ab numquam quisquam beatae optio cumque molestias quia
-                    nemo ipsa, iure non pariatur porro.
-                </Typography>
+                {isEditing ? (
+                    <>
+                        <TextField
+                            sx={{
+                                width: '100%',
+                                border: 'none',
+                                outline: 'none',
+                                '& fieldset': { border: 'none' },
+                            }}
+                            id="caption"
+                            multiline
+                            placeholder="Caption"
+                            variant="standard"
+                            {...register('caption', {
+                                required: true,
+                            })}
+                        />
+                        <Stack
+                            flexDirection={'row'}
+                            justifyContent={'space-between'}
+                            alignItems={'center'}
+                            sx={{ marginTop: '5px' }}>
+                            <Button variant="text" onClick={onCancel}>
+                                Cancel
+                            </Button>
+                            <Button
+                                disabled={!isDirty || !isValid}
+                                variant="contained"
+                                type="submit"
+                                size="small">
+                                Save
+                            </Button>
+                        </Stack>
+                    </>
+                ) : (
+                    <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        sx={{ wordBreak: 'break-word' }}>
+                        {getValues('caption')}
+                    </Typography>
+                )}
             </CardContent>
             <CardActions
                 sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Stack flexDirection={'row'} alignItems={'center'}>
-                    <IconButton aria-label="add to favorites">
-                        <Checkbox
-                            icon={
-                                <FavoriteBorder
-                                    sx={{ color: 'text.primary' }}
-                                />
-                            }
-                            checkedIcon={<Favorite />}
-                        />
-                    </IconButton>
+                    <Checkbox
+                        onClick={handleLike}
+                        checked={checked}
+                        icon={<FavoriteBorder sx={{ color: 'text.primary' }} />}
+                        checkedIcon={<Favorite />}
+                    />
                     <IconButton
-                        aria-label="comments"
-                        sx={{ width: 42, height: 42, marginLeft: '7px' }}>
+                        sx={{ marginLeft: '24px' }}
+                        onClick={handleCommentDialog}>
                         <ModeCommentOutlinedIcon
-                            sx={{ color: 'text.primary' }}
+                            sx={{
+                                color: 'text.primary',
+                                cursor: 'pointer',
+                            }}
                         />
                     </IconButton>
                 </Stack>
@@ -154,46 +291,72 @@ function Post() {
                             color: 'text.primary',
                             marginX: '10px',
                         }}
-                        aria-label="comments-count">
-                        12 likes
+                        aria-label="likes-count">
+                        12 likes {/* add modal for likes */}
                     </Typography>
                     <Typography
+                        htmlFor="addComment"
                         color={'text.primary'}
                         sx={{
                             fontSize: '14px',
                             color: 'text.primary',
+                            cursor: 'pointer',
+                            position: 'relative',
                         }}
-                        aria-label="comments-count">
+                        aria-label="comments-count"
+                        onClick={handleOpen}>
                         View all 20 comments
                     </Typography>
+                    <Modal
+                        open={openModal}
+                        onClose={handleClose}
+                        aria-labelledby="comments"
+                        aria-describedby="list-of-comments">
+                        <Box
+                            sx={{
+                                top: '50%',
+                                left: '50%',
+                                transform: {
+                                    xs: 'translate(-52%, -50%)',
+                                    sm: 'translate(-14%, -50%)',
+                                },
+                                width: 300,
+                                bgcolor: 'background.paper',
+                                position: 'absolute',
+                                boxShadow: 24,
+                                border: 'none',
+                                p: 2,
+                            }}>
+                            <ListOfComments></ListOfComments>
+                        </Box>
+                    </Modal>
                 </Stack>
-                <Stack
-                    component={'form'}
-                    noValidate
-                    onSubmit={handleSubmit((data) => onSubmit(data))}
-                    padding={'10px'}
-                    flexDirection={'row'}
-                    alignItems={'end'}
-                    width={'100%'}
-                    justifyContent={'space-between'}
-                    sx={{ gap: '5px' }}>
-                    <TextField
-                        id="addComment"
-                        variant="standard"
-                        label="Add comment"
-                        sx={{ width: '100%' }}
-                        {...register('addComment', {
-                            required: true,
-                        })}
-                    />
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        size="small"
-                        disabled={!isDirty || !isValid}>
-                        Post
-                    </Button>
-                </Stack>
+                {openCommentDialog && (
+                    <Stack
+                        padding={'10px'}
+                        flexDirection={'row'}
+                        alignItems={'end'}
+                        width={'100%'}
+                        justifyContent={'space-between'}
+                        sx={{ gap: '5px' }}>
+                        <TextField
+                            id="addComment"
+                            variant="standard"
+                            label="Add comment"
+                            sx={{ width: '100%' }}
+                            {...register('addComment', {
+                                required: true,
+                            })}
+                        />
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            size="small"
+                            disabled={!isDirty || !isValid}>
+                            Post
+                        </Button>
+                    </Stack>
+                )}
             </CardActions>
         </Card>
     );
