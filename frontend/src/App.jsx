@@ -14,10 +14,10 @@ import CssBaseline from '@mui/material/CssBaseline';
 import ProfilePage from './pages/ProfilePage.jsx';
 import NotificationPage from './pages/NotificationPage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
-import PostPage from './pages/PostPage.jsx';
 import { Box, createTheme } from '@mui/material';
 import { selectMode } from './features/user/userSlice.js';
 import CreatePostPage from './pages/CreatePostPage.jsx';
+import PostByIdPage from './pages/PostByIdPage.jsx';
 
 const router = createBrowserRouter([
     {
@@ -45,6 +45,10 @@ const router = createBrowserRouter([
         element: <CreatePostPage></CreatePostPage>,
     },
     {
+        path: '/posts/:id',
+        element: <PostByIdPage></PostByIdPage>,
+    },
+    {
         path: '/search',
         element: <SearchPage></SearchPage>,
     },
@@ -57,10 +61,11 @@ function App() {
     const mode = useSelector(selectMode);
     const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
     const dispatch = useDispatch();
-    const getloggedInValue = localStorage.getItem('isLoggedIn');
+    const getLoggedInValue = localStorage.getItem('isLoggedIn');
     useEffect(() => {
-        dispatch(checkLoggedIn({ getloggedInValue }));
-    }, []);
+        const data = dispatch(checkLoggedIn({ getLoggedInValue }));
+        console.log(data);
+    }, [dispatch, getLoggedInValue]);
     return (
         <div className="app">
             {' '}

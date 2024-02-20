@@ -7,7 +7,6 @@ import {
     Link,
     CardMedia,
     TextField,
-    Tooltip,
 } from '@mui/material';
 import ImageListItem from '@mui/material/ImageListItem';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -20,12 +19,9 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
 import { Link as RouterLink } from 'react-router-dom';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Add, Remove } from '@mui/icons-material';
 const itemData = [
     {
         img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
@@ -80,12 +76,12 @@ const itemData = [
 function ImagesList() {
     return (
         <>
-            {itemData.map((item) => (
+            {itemData.map((item, idx) => (
                 <ImageListItem
                     component={RouterLink}
                     sx={{ width: 300 }}
                     key={item.img}
-                    to="posts/1">
+                    to={`/posts/${idx}`}>
                     <img
                         srcSet={`${item.img}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                         src={`${item.img}?w=164&h=164&fit=crop&auto=format`}
@@ -297,17 +293,8 @@ function Profile() {
                             flexDirection: { md: 'row' },
                             alignItems: { md: 'center' },
                         }}
-                        // flexDirection={'row'}
-                        // alignItems={'center'}
                         justifyContent={'space-between'}>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                fontWeight: '500',
-                                fontSize: { md: '20px' },
-                            }}>
-                            Lovish Duggal
-                        </Typography>
+                        <Typography variant="h6">Lovish Duggal</Typography>
                         <Stack flexDirection={'row'} alignItems={'center'}>
                             {checked ? (
                                 <Button

@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -34,6 +35,7 @@ function CreatePost() {
         formState: { errors },
     } = useForm();
     const [previewImage, setPreviewImage] = useState('');
+    const dispatch = useDispatch();
 
     function uploadImage(e) {
         const file = e.target.files[0];
@@ -73,13 +75,8 @@ function CreatePost() {
                             justifyContent={'center'}
                             alignItems={'center'}
                             sx={{
-                                width: {
-                                    xs: '400px',
-                                    sm: '300px',
-                                    md: '400px',
-                                },
-                                maxWidth: '400px',
-                                height: '400px',
+                                width: 300,
+                                height: 300,
                             }}>
                             {' '}
                             <Button
@@ -97,6 +94,13 @@ function CreatePost() {
                                     type="file"
                                 />
                             </Button>
+                            {errors?.image?.message && (
+                                <Typography
+                                    sx={{ fontSize: '12px', marginTop: '3px' }}
+                                    color={'error'}>
+                                    {errors?.image?.message}
+                                </Typography>
+                            )}
                         </Stack>
                     )}
                 </CardActionArea>
@@ -115,13 +119,8 @@ function CreatePost() {
                         {...register('caption', {
                             required: 'Caption is required',
                         })}
-                        error={
-                            (errors?.image?.message ? true : false) ||
-                            (errors?.caption?.message ? true : false)
-                        }
-                        helperText={
-                            errors?.image?.message || errors?.caption?.message
-                        }
+                        error={errors?.caption?.message ? true : false}
+                        helperText={errors?.caption?.message}
                     />
                 </CardContent>
                 <CardActions sx={{ justifyContent: 'flex-end' }}>
