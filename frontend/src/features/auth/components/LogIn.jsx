@@ -36,10 +36,8 @@ function LogIn() {
     const navigate = useNavigate();
 
     async function handleLogIn(data) {
-        const {
-            payload: { success },
-        } = await dispatch(login(data));
-        if (success) {
+        const { payload } = await dispatch(login(data));
+        if (payload?.success) {
             navigate('/');
             return reset();
         }

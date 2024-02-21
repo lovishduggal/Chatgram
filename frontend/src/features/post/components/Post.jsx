@@ -9,6 +9,7 @@ import {
     CardHeader,
     CardMedia,
     Checkbox,
+    CircularProgress,
     IconButton,
     Modal,
     Stack,
@@ -25,8 +26,15 @@ import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
-import { deletePost, updatePost } from '../postSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { deletePost, getAllPost, updatePost } from '../postSlice';
+import {
+    createComment,
+    getAllComments,
+    selectComments,
+    setComments,
+} from '../../comment/commentSlice';
+import { selectUserId } from '../../auth/authSlice';
 
 const options = ['Edit', 'Delete'];
 const ITEM_HEIGHT = 40;
@@ -41,6 +49,7 @@ function MenuLong({
     const [anchorEl, setAnchorEl] = useState(null);
     const dispatch = useDispatch();
     const open = Boolean(anchorEl);
+
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -105,50 +114,71 @@ function MenuLong({
 }
 
 function ListOfComments() {
+    const comments = useSelector(selectComments);
+    const userId = useSelector(selectUserId);
+    function handleDelete() {}
     return (
         <List
             sx={{
                 padding: '0px',
                 width: '100%',
-                maxWidth: 360,
+                maxWidth: '400px',
                 bgcolor: 'background.paper',
                 overflowY: 'auto',
+                minHeight: '100px',
                 maxHeight: 400,
                 '& ul': { padding: 0 },
             }}>
             <ListSubheader>{`Post's comments`}</ListSubheader>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
-            <ListItem key={`1`}>
-                <ListItemText primary={`Item`} />
-            </ListItem>
+            {comments && comments.length > 0 ? (
+                comments.map((comment) => (
+                    <ListItem key={comment?._id}>
+                        <Stack
+                            sx={{ width: '100%' }}
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                            gap={'5px'}>
+                            <Stack flexDirection={'row'} alignItems={'center'}>
+                                <Avatar
+                                    alt={comment?.user?.fullName}
+                                    src={comment?.user?.profilePicture}
+                                    sx={{
+                                        width: 24,
+                                        height: 24,
+                                        marginRight: '5px',
+                                    }}
+                                />{' '}
+                                <ListItemText
+                                    sx={{
+                                        display: 'block',
+                                        wordBreak: 'break-all',
+                                    }}
+                                    primary={comment?.content}
+                                />
+                            </Stack>
+                            {userId === comment.user._id && (
+                                <Button
+                                    variant="text"
+                                    size="small"
+                                    onClick={handleDelete}>
+                                    Delete
+                                </Button>
+                            )}
+                        </Stack>
+                    </ListItem>
+                ))
+            ) : (
+                <CircularProgress
+                    sx={{ translate: '110px 0px' }}
+                    variant="indeterminate"
+                />
+            )}
         </List>
     );
 }
 
-function Post({ data }) {
+function Post({ postId, data, allowed }) {
     const {
         register,
         handleSubmit,
@@ -161,12 +191,13 @@ function Post({ data }) {
     const [openModal, setOpenModal] = useState(false);
     const [checked, setChecked] = useState(false);
     const dispatch = useDispatch();
-    const postId = data._id;
-    console.log(postId);
+
     function handleOpen() {
+        dispatch(getAllComments({ postId }));
         setOpenModal(true);
     }
     function handleClose() {
+        dispatch(setComments({}));
         setOpenModal(false);
     }
 
@@ -192,11 +223,13 @@ function Post({ data }) {
 
         if (addComment) {
             console.log('comment', data);
+            await dispatch(createComment({ content: data.addComment, postId }));
+            dispatch(getAllPost());
             setOpenCommentDialog(false);
             reset();
         } else if (caption) {
             console.log('caption', data.caption);
-            await dispatch(updatePost({ content: data.caption, postId }));
+            dispatch(updatePost({ content: data.caption, postId }));
             setIsEditing(false);
             reset();
         }
@@ -219,20 +252,22 @@ function Post({ data }) {
                         sx={{ bgcolor: 'text.primary', width: 54, height: 54 }}
                         aria-label="profile-pic"
                         src={data?.user?.profilePicture?.url}>
-                        {data?.user?.name[0]}
+                        {data?.user?.fullName[0]}
                     </Avatar>
                 }
                 action={
-                    <MenuLong
-                        setIsEditing={setIsEditing}
-                        setOpenCommentDialog={setOpenCommentDialog}
-                        setValue={setValue}
-                        data={data}
-                        reset={reset}></MenuLong>
+                    allowed && (
+                        <MenuLong
+                            setIsEditing={setIsEditing}
+                            setOpenCommentDialog={setOpenCommentDialog}
+                            setValue={setValue}
+                            data={data}
+                            reset={reset}></MenuLong>
+                    )
                 }
                 title={
                     <Typography variant="subtitle1">
-                        {data?.user?.name}
+                        {data?.user?.fullName}
                     </Typography>
                 }
                 subheader={
@@ -242,12 +277,14 @@ function Post({ data }) {
                 }
             />
             <CardMedia
-                sx={{ width: '100%' }}
+                width="100%"
                 component="img"
                 height="20%"
                 image={data?.image?.url}
                 alt={data?.user?.name}
+                loading="lazy"
             />
+
             <CardContent>
                 {isEditing ? (
                     <>
@@ -333,6 +370,12 @@ function Post({ data }) {
                             color: 'text.primary',
                             cursor: 'pointer',
                             position: 'relative',
+                            opacity: `${
+                                data?.comments?.length === 0 ? '0' : '1'
+                            }`,
+                            pointerEvents: `${
+                                data?.comments?.length === 0 ? 'none' : 'auto'
+                            }`,
                         }}
                         aria-label="comments-count"
                         onClick={handleOpen}>

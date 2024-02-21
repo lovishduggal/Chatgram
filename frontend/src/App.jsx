@@ -7,7 +7,10 @@ import SignUpPage from './pages/SignUpPage.jsx';
 import LogInPage from './pages/LogInPage.jsx';
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { checkLoggedIn } from './features/auth/authSlice.js';
+import {
+    checkLoggedIn,
+    selectLoggedInUser,
+} from './features/auth/authSlice.js';
 import RequireAuth from './features/auth/components/RequireAuth.jsx';
 import Home from './pages/Home.jsx';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -18,6 +21,7 @@ import { Box, createTheme } from '@mui/material';
 import { selectMode } from './features/user/userSlice.js';
 import CreatePostPage from './pages/CreatePostPage.jsx';
 import PostByIdPage from './pages/PostByIdPage.jsx';
+import { getAllPost } from './features/post/postSlice.js';
 
 const router = createBrowserRouter([
     {
@@ -62,10 +66,16 @@ function App() {
     const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
     const dispatch = useDispatch();
     const getLoggedInValue = localStorage.getItem('isLoggedIn');
+    const getUserIdValue = localStorage.getItem('userId');
+    const isLoggedIn = useSelector(selectLoggedInUser);
+
     useEffect(() => {
-        const data = dispatch(checkLoggedIn({ getLoggedInValue }));
-        console.log(data);
-    }, [dispatch, getLoggedInValue]);
+        if (isLoggedIn || getLoggedInValue) {
+            console.log('hii');
+            dispatch(checkLoggedIn({ getLoggedInValue, getUserIdValue })); //* Persist the loggedIn state
+            dispatch(getAllPost());
+        }
+    }, [dispatch, getLoggedInValue, isLoggedIn]);
     return (
         <div className="app">
             {' '}

@@ -1,22 +1,23 @@
 import { CircularProgress, Stack } from '@mui/material';
 import Post from './Post';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { getAllPost, selectIsLoading, selectPosts } from '../postSlice';
-import { AdbSharp } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
+import { selectPosts } from '../postSlice';
+import { selectUserId } from '../../auth/authSlice';
 
 function Posts() {
-    const dispatch = useDispatch();
-    const isLoading = useSelector(selectIsLoading);
     const posts = useSelector(selectPosts);
-    useEffect(() => {
-        (async () => {
-            dispatch(getAllPost());
-        })();
-    }, [dispatch]);
+    const userId = useSelector(selectUserId);
     return (
         <Stack justifyContent="center" alignItems="center">
-            {isLoading ? (
+            {posts && posts?.length > 0 ? (
+                posts.map((post) => (
+                    <Post
+                        key={post._id}
+                        postId={post._id}
+                        data={post}
+                        allowed={userId === post.user._id}></Post>
+                ))
+            ) : (
                 <CircularProgress
                     sx={{
                         position: 'relative',
@@ -25,8 +26,6 @@ function Posts() {
                     }}
                     variant="indeterminate"
                 />
-            ) : (
-                posts.map((post) => <Post key={post._id} data={post}></Post>)
             )}
         </Stack>
     );

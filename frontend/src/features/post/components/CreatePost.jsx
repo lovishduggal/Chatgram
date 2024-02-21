@@ -15,6 +15,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { uploadPost } from '../postSlice';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -32,6 +33,7 @@ function CreatePost() {
     const {
         register,
         handleSubmit,
+        reset,
         formState: { errors },
     } = useForm();
     const [previewImage, setPreviewImage] = useState('');
@@ -45,9 +47,18 @@ function CreatePost() {
             setPreviewImage(reader.result);
         };
     }
-    function onSubmit(data) {
+    async function onSubmit(data) {
         const formData = new FormData();
-        console.log('API', data);
+
+        formData.append('image', data?.image[0]);
+        formData.append('content', data?.caption);
+
+        const { payload } = await dispatch(uploadPost(formData));
+        if (payload?.success) {
+            console.log('inside');
+            setPreviewImage('');
+            reset();
+        }
     }
     return (
         <div
