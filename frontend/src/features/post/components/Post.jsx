@@ -30,11 +30,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deletePost, getAllPost, updatePost } from '../postSlice';
 import {
     createComment,
+    deleteComment,
     getAllComments,
     selectComments,
     setComments,
 } from '../../comment/commentSlice';
 import { selectUserId } from '../../auth/authSlice';
+import {
+    getAllLikes,
+    likePost,
+    selectLikes,
+    setLikes,
+    unLikePost,
+} from '../../like/likeSlice';
 
 const options = ['Edit', 'Delete'];
 const ITEM_HEIGHT = 40;
@@ -53,8 +61,7 @@ function MenuLong({
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
-    const handleClose = (e) => {
-        console.log('API call', anchorEl, e.currentTarget.dataset.myValue);
+    const handleCloseComments = (e) => {
         if (e.currentTarget.dataset.myValue === 'Edit') {
             setValue('caption', data.content);
             setIsEditing(true);
@@ -66,8 +73,6 @@ function MenuLong({
             dispatch(deletePost({ postId: data._id }));
             // reset(); Later we will see this is required or not.
         }
-
-        //* I can perform delete operation here directly (API)
         setAnchorEl(null);
     };
 
@@ -90,7 +95,7 @@ function MenuLong({
                 }}
                 anchorEl={anchorEl}
                 open={open}
-                onClose={handleClose}
+                onClose={handleCloseComments}
                 PaperProps={{
                     style: {
                         maxHeight: ITEM_HEIGHT * 4.5,
@@ -104,7 +109,7 @@ function MenuLong({
                         key={option}
                         data-my-value={option}
                         selected={option === 'Pyxis'}
-                        onClick={handleClose}>
+                        onClick={handleCloseComments}>
                         {option}
                     </MenuItem>
                 ))}
@@ -113,16 +118,83 @@ function MenuLong({
     );
 }
 
-function ListOfComments() {
-    const comments = useSelector(selectComments);
-    const userId = useSelector(selectUserId);
-    function handleDelete() {}
+function ListOfLikes() {
+    const likes = useSelector(selectLikes);
     return (
         <List
             sx={{
                 padding: '0px',
                 width: '100%',
-                maxWidth: '400px',
+                bgcolor: 'background.paper',
+                overflowY: 'auto',
+                minHeight: '100px',
+                maxHeight: 400,
+                '& ul': { padding: 0 },
+            }}>
+            <ListSubheader>{`Post's likes`}</ListSubheader>
+            {likes && likes.length > 0 ? (
+                likes.map((like) => (
+                    <ListItem
+                        key={like?._id}
+                        sx={{
+                            borderBottom: 1,
+                            borderTop: 1,
+                            marginY: '15px',
+                        }}>
+                        <Stack
+                            sx={{ width: '100%' }}
+                            direction="row"
+                            justifyContent="flex-start"
+                            alignItems="center"
+                            gap={'5px'}>
+                            <Avatar
+                                alt={like?.user?.fullName}
+                                src={like?.user?.profilePicture}
+                                sx={{
+                                    bgcolor: 'text.primary',
+                                    width: 32,
+                                    height: 32,
+                                    border: 2,
+                                    borderColor: '#E43D90',
+                                }}>
+                                {' '}
+                                {like?.user?.fullName &&
+                                    like?.user?.fullName[0]}
+                            </Avatar>{' '}
+                            <Typography
+                                sx={{
+                                    fontSize: '14px',
+                                    wordBreak: 'break-all',
+                                    fontWeight: '500',
+                                }}>
+                                {like?.user?.fullName}
+                            </Typography>
+                        </Stack>
+                    </ListItem>
+                ))
+            ) : (
+                <CircularProgress
+                    sx={{ translate: '110px 0px' }}
+                    variant="indeterminate"
+                />
+            )}
+        </List>
+    );
+}
+
+function ListOfComments({ postId }) {
+    const comments = useSelector(selectComments);
+    const userId = useSelector(selectUserId);
+    const dispatch = useDispatch();
+    async function handleDelete(commentId) {
+        await dispatch(deleteComment({ postId, commentId }));
+        dispatch(getAllPost());
+    }
+    return (
+        <List
+            sx={{
+                padding: '0px',
+                width: '100%',
                 bgcolor: 'background.paper',
                 overflowY: 'auto',
                 minHeight: '100px',
@@ -132,7 +204,13 @@ function ListOfComments() {
             <ListSubheader>{`Post's comments`}</ListSubheader>
             {comments && comments.length > 0 ? (
                 comments.map((comment) => (
-                    <ListItem key={comment?._id}>
+                    <ListItem
+                        key={comment?._id}
+                        sx={{
+                            borderBottom: 1,
+                            borderTop: 1,
+                            marginY: '15px',
+                        }}>
                         <Stack
                             sx={{ width: '100%' }}
                             direction="row"
@@ -144,24 +222,40 @@ function ListOfComments() {
                                     alt={comment?.user?.fullName}
                                     src={comment?.user?.profilePicture}
                                     sx={{
-                                        width: 24,
-                                        height: 24,
-                                        marginRight: '5px',
-                                    }}
-                                />{' '}
-                                <ListItemText
-                                    sx={{
-                                        display: 'block',
-                                        wordBreak: 'break-all',
-                                    }}
-                                    primary={comment?.content}
-                                />
+                                        bgcolor: 'text.primary',
+                                        width: 32,
+                                        height: 32,
+                                        marginRight: '10px',
+                                        border: 2,
+                                        borderColor: '#E43D90',
+                                    }}>
+                                    {' '}
+                                    {comment?.user?.fullName &&
+                                        comment?.user?.fullName[0]}
+                                </Avatar>{' '}
+                                <Stack>
+                                    <Typography
+                                        sx={{
+                                            fontSize: '14px',
+                                            wordBreak: 'break-all',
+                                            fontWeight: '500',
+                                        }}>
+                                        {comment?.user?.fullName}
+                                    </Typography>
+                                    <Typography
+                                        sx={{
+                                            fontSize: '14px',
+                                            wordBreak: 'break-all',
+                                        }}>
+                                        {comment?.content}
+                                    </Typography>
+                                </Stack>
                             </Stack>
                             {userId === comment.user._id && (
                                 <Button
                                     variant="text"
                                     size="small"
-                                    onClick={handleDelete}>
+                                    onClick={() => handleDelete(comment._id)}>
                                     Delete
                                 </Button>
                             )}
@@ -178,7 +272,7 @@ function ListOfComments() {
     );
 }
 
-function Post({ postId, data, allowed }) {
+function Post({ postId, data, allowed, isLikedByUser }) {
     const {
         register,
         handleSubmit,
@@ -188,22 +282,39 @@ function Post({ postId, data, allowed }) {
     } = useForm();
     const [isEditing, setIsEditing] = useState(false);
     const [openCommentDialog, setOpenCommentDialog] = useState(false);
-    const [openModal, setOpenModal] = useState(false);
-    const [checked, setChecked] = useState(false);
+    const [openCommentsModal, setOpenCommentsModal] = useState(false);
+    const [openLikesModal, setOpenLikesModal] = useState(false);
     const dispatch = useDispatch();
 
-    function handleOpen() {
-        dispatch(getAllComments({ postId }));
-        setOpenModal(true);
-    }
-    function handleClose() {
-        dispatch(setComments({}));
-        setOpenModal(false);
+    function handleOpenLikes() {
+        dispatch(getAllLikes({ postId }));
+        setOpenLikesModal(true);
     }
 
-    function handleLike(e) {
+    function handleCloseLikes() {
+        dispatch(setLikes({}));
+        setOpenLikesModal(false);
+    }
+
+    function handleOpenComments() {
+        dispatch(getAllComments({ postId }));
+        setOpenCommentsModal(true);
+    }
+
+    function handleCloseComments() {
+        dispatch(setComments({}));
+        setOpenCommentsModal(false);
+    }
+
+    async function handleLike(e) {
         console.log('Handle like API here', e.target.checked);
-        setChecked(e.target.checked);
+        if (e.target.checked) {
+            await dispatch(likePost({ postId }));
+            dispatch(getAllPost());
+        } else {
+            await dispatch(unLikePost({ postId }));
+            dispatch(getAllPost());
+        }
     }
 
     function handleCommentDialog() {
@@ -249,10 +360,16 @@ function Post({ postId, data, allowed }) {
             <CardHeader
                 avatar={
                     <Avatar
-                        sx={{ bgcolor: 'text.primary', width: 54, height: 54 }}
+                        sx={{
+                            bgcolor: 'text.primary',
+                            width: 54,
+                            height: 54,
+                            border: 3,
+                            borderColor: '#E43D90',
+                        }}
                         aria-label="profile-pic"
                         src={data?.user?.profilePicture?.url}>
-                        {data?.user?.fullName[0]}
+                        {data?.user?.fullName && data?.user?.fullName[0]}
                     </Avatar>
                 }
                 action={
@@ -276,10 +393,11 @@ function Post({ postId, data, allowed }) {
                     </Typography>
                 }
             />
+
             <CardMedia
-                width="100%"
+                width="400px"
                 component="img"
-                height="20%"
+                height="400px"
                 image={data?.image?.url}
                 alt={data?.user?.name}
                 loading="lazy"
@@ -329,12 +447,13 @@ function Post({ postId, data, allowed }) {
                     </Typography>
                 )}
             </CardContent>
+
             <CardActions
                 sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
                 <Stack flexDirection={'row'} alignItems={'center'}>
                     <Checkbox
                         onClick={handleLike}
-                        checked={checked}
+                        checked={isLikedByUser}
                         icon={<FavoriteBorder sx={{ color: 'text.primary' }} />}
                         checkedIcon={<Favorite />}
                     />
@@ -358,10 +477,36 @@ function Post({ postId, data, allowed }) {
                             fontSize: '14px',
                             color: 'text.primary',
                             marginX: '10px',
+                            cursor: 'pointer',
                         }}
-                        aria-label="likes-count">
+                        aria-label="likes-count"
+                        onClick={handleOpenLikes}>
                         {data?.likes?.length} likes {/* add modal for likes */}
                     </Typography>
+                    <Modal
+                        open={openLikesModal}
+                        onClose={handleCloseLikes}
+                        aria-labelledby="comments"
+                        aria-describedby="list-of-comments">
+                        <Box
+                            sx={{
+                                top: '50%',
+                                left: '50%',
+                                transform: {
+                                    xs: 'translate(-52%, -50%)',
+                                    sm: 'translate(-14%, -50%)',
+                                },
+                                width: 300,
+                                maxWidth: 500,
+                                bgcolor: 'background.paper',
+                                position: 'absolute',
+                                boxShadow: 24,
+                                border: 'none',
+                                p: 2,
+                            }}>
+                            <ListOfLikes postId={postId}></ListOfLikes>
+                        </Box>
+                    </Modal>
                     <Typography
                         htmlFor="addComment"
                         color={'text.primary'}
@@ -378,12 +523,12 @@ function Post({ postId, data, allowed }) {
                             }`,
                         }}
                         aria-label="comments-count"
-                        onClick={handleOpen}>
+                        onClick={handleOpenComments}>
                         View all {data?.comments?.length} comments
                     </Typography>
                     <Modal
-                        open={openModal}
-                        onClose={handleClose}
+                        open={openCommentsModal}
+                        onClose={handleCloseComments}
                         aria-labelledby="comments"
                         aria-describedby="list-of-comments">
                         <Box
@@ -395,13 +540,14 @@ function Post({ postId, data, allowed }) {
                                     sm: 'translate(-14%, -50%)',
                                 },
                                 width: 300,
+                                maxWidth: 500,
                                 bgcolor: 'background.paper',
                                 position: 'absolute',
                                 boxShadow: 24,
                                 border: 'none',
                                 p: 2,
                             }}>
-                            <ListOfComments></ListOfComments>
+                            <ListOfComments postId={postId}></ListOfComments>
                         </Box>
                     </Modal>
                 </Stack>

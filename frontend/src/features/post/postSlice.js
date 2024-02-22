@@ -45,8 +45,15 @@ export const updatePost = createAsyncThunk('post/updatePost', async (data) => {
 export const deletePost = createAsyncThunk('post/deletePost', async (data) => {
     const { postId } = data;
     try {
-        const response = await axiosInstance.delete(`/post/${postId}`);
-        return response.data;
+        const response = axiosInstance.delete(`/post/${postId}`);
+        toast.promise(response, {
+            loading: 'Deleting...',
+            success: (response) => {
+                return response?.data?.message;
+            },
+            error: 'Failed to delete the post',
+        });
+        return (await response).data;
     } catch (error) {
         toast.error(error.response.data.message);
     }
@@ -65,8 +72,9 @@ const postSlice = createSlice({
                 state.posts.unshift(action.payload.newPost);
             })
             .addCase(updatePost.fulfilled, (state, action) => {
+                console.log(action);
                 const index = state.posts.findIndex(
-                    (post) => post._id === action.payload.updatedPost._i
+                    (post) => post._id === action.payload.updatedPost._id
                 );
                 state.posts[index] = action.payload.updatedPost;
             })

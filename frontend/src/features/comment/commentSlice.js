@@ -31,7 +31,7 @@ export const createComment = createAsyncThunk(
                 success: (response) => {
                     return response.data.message;
                 },
-                error: ' Failed to post the comment',
+                error: 'Failed to post the comment',
             });
             return (await response).data;
         } catch (error) {
@@ -40,28 +40,22 @@ export const createComment = createAsyncThunk(
     }
 );
 
-export const updatePost = createAsyncThunk(
-    'comment/updatePost',
+export const deleteComment = createAsyncThunk(
+    'comment/deleteComment',
     async (data) => {
-        const { content, postId } = data;
+        const { postId, commentId } = data;
         try {
-            const response = await axiosInstance.put(`/comment/${postId}`, {
-                content,
+            const response = axiosInstance.delete(
+                `/comment/${postId}/${commentId}`
+            );
+            toast.promise(response, {
+                loading: 'Deleting comment...',
+                success: (response) => {
+                    return response.data.message;
+                },
+                error: 'Failed to delete the comment',
             });
-            return response.data;
-        } catch (error) {
-            toast.error(error.response.data.message);
-        }
-    }
-);
-
-export const deletePost = createAsyncThunk(
-    'comment/deletePost',
-    async (data) => {
-        const { postId } = data;
-        try {
-            const response = await axiosInstance.delete(`/comment/${postId}`);
-            return response.data;
+            return (await response).data;
         } catch (error) {
             toast.error(error.response.data.message);
         }
@@ -80,18 +74,10 @@ const commentSlice = createSlice({
             .addCase(getAllComments.fulfilled, (state, action) => {
                 state.comments = action.payload.comments;
             })
-            .addCase(createComment.fulfilled, (state, action) => {
-                state.comments.push(action.payload.newComment);
-            })
-            .addCase(updatePost.fulfilled, (state, action) => {
+            .addCase(deleteComment.fulfilled, (state, action) => {
                 const index = state.comments.findIndex(
-                    (comment) => comment._id === action.payload.updatedPost._id
-                );
-                state.comments[index] = action.payload.updatedPost;
-            })
-            .addCase(deletePost.fulfilled, (state, action) => {
-                const index = state.comments.findIndex(
-                    (comment) => comment._id === action.payload.deletedPost._id
+                    (comment) =>
+                        comment._id === action.payload.deletedComment._id
                 );
                 state.comments.splice(index, 1);
             });

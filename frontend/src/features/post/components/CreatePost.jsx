@@ -72,12 +72,14 @@ function CreatePost() {
                 component={'form'}
                 noValidate
                 onSubmit={handleSubmit((data) => onSubmit(data))}
-                sx={{ maxWidth: '400px', boxShadow: 4 }}>
+                sx={{ width: '400px', boxShadow: 4 }}>
                 <CardActionArea>
                     {previewImage ? (
                         <CardMedia
+                            sx={{ objectFit: 'contain' }}
                             component="img"
-                            height="auto"
+                            width="400px"
+                            height="400px"
                             image={previewImage}
                             alt="upload image"
                         />
@@ -86,8 +88,8 @@ function CreatePost() {
                             justifyContent={'center'}
                             alignItems={'center'}
                             sx={{
-                                width: 300,
-                                height: 300,
+                                width: 1,
+                                height: 400,
                             }}>
                             {' '}
                             <Button

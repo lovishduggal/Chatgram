@@ -7,6 +7,15 @@ import { selectUserId } from '../../auth/authSlice';
 function Posts() {
     const posts = useSelector(selectPosts);
     const userId = useSelector(selectUserId);
+
+    function search(userId, arrOfObjsLikes) {
+        for (let i = 0; i < arrOfObjsLikes.length; i++) {
+            if (arrOfObjsLikes[i].user === userId) {
+                return true;
+            }
+        }
+        return false;
+    }
     return (
         <Stack justifyContent="center" alignItems="center">
             {posts && posts?.length > 0 ? (
@@ -15,7 +24,8 @@ function Posts() {
                         key={post._id}
                         postId={post._id}
                         data={post}
-                        allowed={userId === post.user._id}></Post>
+                        allowed={userId === post.user._id}
+                        isLikedByUser={search(userId, post.likes)}></Post>
                 ))
             ) : (
                 <CircularProgress
