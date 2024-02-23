@@ -11,6 +11,7 @@ import {
     Checkbox,
     CircularProgress,
     IconButton,
+    Link,
     Modal,
     Stack,
     TextField,
@@ -43,6 +44,8 @@ import {
     setLikes,
     unLikePost,
 } from '../../like/likeSlice';
+import { Link as RouterLink } from 'react-router-dom';
+import { getUserProfile } from '../../user/userSlice';
 
 const options = ['Edit', 'Delete'];
 const ITEM_HEIGHT = 40;
@@ -61,7 +64,7 @@ function MenuLong({
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
-    const handleCloseComments = (e) => {
+    const handleCloseComments = async (e) => {
         if (e.currentTarget.dataset.myValue === 'Edit') {
             setValue('caption', data.content);
             setIsEditing(true);
@@ -70,7 +73,8 @@ function MenuLong({
         }
 
         if (e.currentTarget.dataset.myValue === 'Delete') {
-            dispatch(deletePost({ postId: data._id }));
+            await dispatch(deletePost({ postId: data._id }));
+            dispatch(getUserProfile({ userId: data?.user?._id }));
             // reset(); Later we will see this is required or not.
         }
         setAnchorEl(null);
@@ -307,14 +311,9 @@ function Post({ postId, data, allowed, isLikedByUser }) {
     }
 
     async function handleLike(e) {
-        console.log('Handle like API here', e.target.checked);
-        if (e.target.checked) {
-            await dispatch(likePost({ postId }));
-            dispatch(getAllPost());
-        } else {
-            await dispatch(unLikePost({ postId }));
-            dispatch(getAllPost());
-        }
+        if (e.target.checked) await dispatch(likePost({ postId }));
+        else await dispatch(unLikePost({ postId }));
+        dispatch(getAllPost());
     }
 
     function handleCommentDialog() {
@@ -383,9 +382,14 @@ function Post({ postId, data, allowed, isLikedByUser }) {
                     )
                 }
                 title={
-                    <Typography variant="subtitle1">
+                    <Link
+                        to={allowed ? `/profile` : `/profile/${data.user._id}`}
+                        component={RouterLink}
+                        underline="none"
+                        color={'text.primary'}
+                        variant="subtitle1">
                         {data?.user?.fullName}
-                    </Typography>
+                    </Link>
                 }
                 subheader={
                     <Typography variant="caption">
@@ -478,16 +482,20 @@ function Post({ postId, data, allowed, isLikedByUser }) {
                             color: 'text.primary',
                             marginX: '10px',
                             cursor: 'pointer',
+                            opacity: `${data?.likes?.length === 0 ? '0' : '1'}`,
+                            pointerEvents: `${
+                                data?.likes?.length === 0 ? 'none' : 'auto'
+                            }`,
                         }}
                         aria-label="likes-count"
                         onClick={handleOpenLikes}>
-                        {data?.likes?.length} likes {/* add modal for likes */}
+                        {data?.likes?.length} likes
                     </Typography>
                     <Modal
                         open={openLikesModal}
                         onClose={handleCloseLikes}
-                        aria-labelledby="comments"
-                        aria-describedby="list-of-comments">
+                        aria-labelledby="likes"
+                        aria-describedby="list-of-likes">
                         <Box
                             sx={{
                                 top: '50%',
@@ -504,7 +512,7 @@ function Post({ postId, data, allowed, isLikedByUser }) {
                                 border: 'none',
                                 p: 2,
                             }}>
-                            <ListOfLikes postId={postId}></ListOfLikes>
+                            <ListOfLikes></ListOfLikes>
                         </Box>
                     </Modal>
                     <Typography

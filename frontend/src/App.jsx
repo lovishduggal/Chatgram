@@ -18,10 +18,11 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import NotificationPage from './pages/NotificationPage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
 import { Box, createTheme } from '@mui/material';
-import { selectMode } from './features/user/userSlice.js';
+import { getUserProfile, selectMode } from './features/user/userSlice.js';
 import CreatePostPage from './pages/CreatePostPage.jsx';
 import PostByIdPage from './pages/PostByIdPage.jsx';
 import { getAllPost } from './features/post/postSlice.js';
+import OtherUserProfilePage from './pages/OtherUserProfilePage.jsx';
 
 const router = createBrowserRouter([
     {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
     {
         path: '/profile',
         element: <ProfilePage></ProfilePage>,
+    },
+    {
+        path: '/profile/:id',
+        element: <OtherUserProfilePage></OtherUserProfilePage>,
     },
     {
         path: '/create-post',
@@ -74,8 +79,9 @@ function App() {
             console.log('hii');
             dispatch(checkLoggedIn({ getLoggedInValue, getUserIdValue })); //* Persist the loggedIn state
             dispatch(getAllPost());
+            dispatch(getUserProfile({ userId: getUserIdValue }));
         }
-    }, [dispatch, getLoggedInValue, isLoggedIn]);
+    }, [dispatch, getLoggedInValue, isLoggedIn, getUserIdValue]);
     return (
         <div className="app">
             {' '}

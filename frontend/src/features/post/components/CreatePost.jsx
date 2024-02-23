@@ -14,8 +14,11 @@ import {
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { uploadPost } from '../postSlice';
+import { useNavigate } from 'react-router-dom';
+import { getUserProfile } from '../../user/userSlice';
+import { selectUserId } from '../../auth/authSlice';
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -38,6 +41,8 @@ function CreatePost() {
     } = useForm();
     const [previewImage, setPreviewImage] = useState('');
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const userId = useSelector(selectUserId);
 
     function uploadImage(e) {
         const file = e.target.files[0];
@@ -55,7 +60,8 @@ function CreatePost() {
 
         const { payload } = await dispatch(uploadPost(formData));
         if (payload?.success) {
-            console.log('inside');
+            navigate('/');
+            dispatch(getUserProfile({ userId }));
             setPreviewImage('');
             reset();
         }

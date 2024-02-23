@@ -26,10 +26,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectPosts } from '../../../post/postSlice';
 import {
     getUserProfileOfOtherUser,
+    selectOtherUser,
     selectUser,
-    updateUserProfile,
 } from '../../userSlice';
-import { AlternateEmail } from '@mui/icons-material';
 
 function ImagesList({ user }) {
     return (
@@ -76,18 +75,14 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
-function EditProfileDialog({
-    open,
-    handleClose,
-    user,
-    previousProfilePicture,
-    register,
-    handleSubmit,
-    reset,
-    errors,
-}) {
+function EditProfileDialog({ open, handleClose }) {
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm();
     const [previewImage, setPreviewImage] = useState('');
-    const dispatch = useDispatch();
 
     function uploadImage(e) {
         const file = e.target.files[0];
@@ -98,21 +93,11 @@ function EditProfileDialog({
         };
     }
 
-    async function onSubmit(data) {
+    function onSubmit(data) {
         const formData = new FormData();
-        formData.append('image', data.image[0]);
-        formData.append('name', data.name);
-        formData.append('email', data.email);
-        formData.append('bio', data.bio);
-        formData.append('website', data.website);
-        formData.append('interests', data.interests);
-
-        const { payload } = await dispatch(updateUserProfile(formData));
-        if (payload.success) {
-            handleClose();
-            setPreviewImage('');
-            reset();
-        }
+        console.log('API', data);
+        handleClose();
+        reset();
     }
     return (
         <BootstrapDialog
@@ -124,7 +109,7 @@ function EditProfileDialog({
             aria-labelledby="customized-dialog-title"
             open={open}>
             <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                Edit Profile
+                Edit OtherUserProfile
             </DialogTitle>
             <IconButton
                 aria-label="close"
@@ -142,39 +127,21 @@ function EditProfileDialog({
                     alignItems={'center'}
                     spacing={1}
                     sx={{ marginBottom: 2 }}>
-                    {previousProfilePicture || previewImage ? (
-                        <CardMedia
-                            sx={{
-                                borderRadius: '50%',
-                                width: '150px',
-                                height: '150px',
-                                objectFit: 'contain',
-                            }}
-                            component="img"
-                            height="auto"
-                            image={
-                                previewImage
-                                    ? previewImage
-                                    : previousProfilePicture
-                            }
-                            alt="change image"
-                        />
-                    ) : (
-                        <Avatar
-                            sx={{
-                                width: '150px',
-                                height: '150px',
-                                bgcolor: 'text.primary',
-                            }}
-                            alt={user?.fullName}
-                            src={user?.profilePicture?.url}>
-                            {user?.fullName && (
-                                <Typography variant="h1">
-                                    {user?.fullName[0]}
-                                </Typography>
-                            )}
-                        </Avatar>
-                    )}
+                    <CardMedia
+                        sx={{
+                            borderRadius: '50%',
+                            width: '150px',
+                            height: '150px',
+                        }}
+                        component="img"
+                        height="auto"
+                        image={
+                            previewImage
+                                ? previewImage
+                                : 'https://pbs.twimg.com/profile_images/1605145946274160640/kgPFhFbm_400x400.jpg'
+                        }
+                        alt="change image"
+                    />
                     <Stack justifyContent={'center'} alignItems={'center'}>
                         {' '}
                         <Button
@@ -219,41 +186,6 @@ function EditProfileDialog({
                         '& fieldset': { border: 'none' },
                         marginBottom: 2,
                     }}
-                    id="email"
-                    multiline
-                    placeholder="Email"
-                    variant="standard"
-                    {...register('email', {
-                        pattern: {
-                            value: /^\S+@\S+\.\S+$/,
-                            message: 'Email address is not valid',
-                        },
-                    })}
-                    error={errors?.email?.message ? true : false}
-                    helperText={errors?.email?.message}
-                />
-                <TextField
-                    sx={{
-                        width: '100%',
-                        border: 'none',
-                        outline: 'none',
-                        '& fieldset': { border: 'none' },
-                        marginBottom: 2,
-                    }}
-                    id="interests"
-                    multiline
-                    placeholder="Interests"
-                    variant="standard"
-                    {...register('interests')}
-                />
-                <TextField
-                    sx={{
-                        width: '100%',
-                        border: 'none',
-                        outline: 'none',
-                        '& fieldset': { border: 'none' },
-                        marginBottom: 2,
-                    }}
                     id="bio"
                     multiline
                     placeholder="Bio"
@@ -284,30 +216,30 @@ function EditProfileDialog({
     );
 }
 
-function Profile() {
+function OtherUserProfile() {
     const [open, setOpen] = useState(false);
-    const {
-        register,
-        handleSubmit,
-        reset,
-        setValue,
-        formState: { errors },
-    } = useForm();
-
-    const user = useSelector(selectUser);
+    const [checked, setChecked] = useState(false);
+    const userId = useParams().id;
+    const dispatch = useDispatch();
+    const user = useSelector(selectOtherUser);
+    console.log(userId);
 
     const handleClickOpen = () => {
-        setValue('name', user?.fullName);
-        setValue('email', user?.email);
-        setValue('bio', user?.bio);
-        setValue('website', user?.website);
-        setValue('interests', user?.interests);
         setOpen(true);
     };
     const handleClose = () => {
         setOpen(false);
     };
+    function handleFollow(e) {
+        console.log('Handle follow API here', e.currentTarget.dataset.myValue);
+        setChecked(!checked);
+    }
 
+    useEffect(() => {
+        if (userId) {
+            dispatch(getUserProfileOfOtherUser({ userId }));
+        }
+    }, [dispatch, userId]);
     return (
         <Box bgcolor={'background.default'} color={'text.primary'}>
             <Stack
@@ -320,19 +252,9 @@ function Profile() {
                 justifyContent={'space-between'}
                 alignItems={'center'}>
                 <Avatar
-                    sx={{
-                        width: '150px',
-                        height: '150px',
-                        bgcolor: 'text.primary',
-                    }}
-                    alt={user?.fullName}
-                    src={user?.profilePicture?.url}>
-                    {user?.fullName && (
-                        <Typography variant="h1">
-                            {user?.fullName[0]}
-                        </Typography>
-                    )}
-                </Avatar>
+                    sx={{ width: '150px', height: '150px' }}
+                    alt="Lovish Duggal"
+                    src="https://pbs.twimg.com/profile_images/1605145946274160640/kgPFhFbm_400x400.jpg"></Avatar>
                 <Stack sx={{ width: 1 }}>
                     <Stack
                         sx={{
@@ -342,33 +264,45 @@ function Profile() {
                             alignItems: { md: 'center' },
                         }}
                         justifyContent={'space-between'}>
-                        <Typography variant="h6">{user?.fullName}</Typography>
+                        <Typography variant="h6">Lovish Duggal</Typography>
                         <Stack flexDirection={'row'} alignItems={'center'}>
+                            {checked ? (
+                                <Button
+                                    sx={{ marginRight: '5px' }}
+                                    data-my-value="unfollow"
+                                    onClick={handleFollow}
+                                    size="small"
+                                    variant="contained"
+                                    color="primary">
+                                    Unfollow
+                                </Button>
+                            ) : (
+                                <Button
+                                    sx={{ marginRight: '5px' }}
+                                    data-my-value="unfollow"
+                                    onClick={handleFollow}
+                                    size="small"
+                                    variant="contained"
+                                    color="primary">
+                                    Follow
+                                </Button>
+                            )}
                             <Button
                                 color="primary"
                                 size="small"
                                 variant="outlined"
                                 onClick={handleClickOpen}>
-                                Edit Profile
+                                Edit OtherUserProfile
                             </Button>
                             <EditProfileDialog
                                 open={open}
-                                user={user}
-                                handleClose={handleClose}
-                                previousProfilePicture={
-                                    user?.profilePicture?.url
-                                }
-                                register={register}
-                                handleSubmit={handleSubmit}
-                                reset={reset}
-                                errors={errors}></EditProfileDialog>
+                                handleClose={handleClose}></EditProfileDialog>
                         </Stack>
                     </Stack>
                     <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                        {user?.bio || ' Science, Technology & Engineering'}
-                    </Typography>
-                    <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                        {user?.interests || 'Bio'}
+                        Lovish Duggal is a software engineer and a student at
+                        University of Toronto. Lorem ipsum dolor sit amet
+                        consectetur adipisicing elit.
                     </Typography>
                     <Stack flexDirection={'row'} flexWrap={'wrap'}>
                         <Stack
@@ -384,42 +318,25 @@ function Profile() {
                                 }}></CalendarMonthIcon>
                             <Typography variant="body2">
                                 {' '}
-                                Joined{' '}
-                                {new Date(user?.createdAt).toDateString()}
+                                Joined {new Date().toDateString()}
                             </Typography>
                         </Stack>
-                        {user?.website && (
-                            <Stack
-                                flexDirection={'row'}
-                                alignItems={'center'}
-                                sx={{ marginRight: '20px' }}>
-                                {' '}
-                                <InsertLinkIcon
-                                    sx={{
-                                        width: '18px',
-                                        marginRight: '4px',
-                                    }}></InsertLinkIcon>
-                                <Typography variant="body2">
-                                    {' '}
-                                    <Link
-                                        component={RouterLink}
-                                        to={user?.website}
-                                        target="_blank">
-                                        {' '}
-                                        {user?.website?.split('https://www.')}
-                                    </Link>{' '}
-                                </Typography>
-                            </Stack>
-                        )}
                         <Stack flexDirection={'row'} alignItems={'center'}>
                             {' '}
-                            <AlternateEmail
+                            <InsertLinkIcon
                                 sx={{
                                     width: '18px',
                                     marginRight: '4px',
-                                }}></AlternateEmail>
+                                }}></InsertLinkIcon>
                             <Typography variant="body2">
-                                {user?.email}
+                                {' '}
+                                <Link
+                                    component={RouterLink}
+                                    to="https://t.co/tHBDZAWKvl"
+                                    target="_blank">
+                                    {' '}
+                                    https://t.co/tHBDZAWKvl
+                                </Link>{' '}
                             </Typography>
                         </Stack>
                     </Stack>
@@ -440,11 +357,9 @@ function Profile() {
                     sx={{ flexDirection: { md: 'row' } }}>
                     <Typography
                         sx={{ marginRight: { md: '5px' }, fontWeight: '500' }}>
-                        {user?.posts && user?.posts.length > 0
-                            ? user?.posts.length
-                            : '0'}
+                        1500
                     </Typography>
-                    <Typography>posts</Typography>
+                    <Typography>user</Typography>
                 </Stack>
                 <Stack
                     alignItems={'center'}
@@ -452,9 +367,7 @@ function Profile() {
                     {' '}
                     <Typography
                         sx={{ marginRight: { md: '5px' }, fontWeight: '500' }}>
-                        {user?.followers && user?.followers.length > 0
-                            ? user?.followers.length
-                            : '0'}
+                        1500
                     </Typography>
                     <Typography>followers</Typography>
                 </Stack>
@@ -464,9 +377,7 @@ function Profile() {
                     {' '}
                     <Typography
                         sx={{ marginRight: { md: '5px' }, fontWeight: '500' }}>
-                        {user?.following && user?.following.length > 0
-                            ? user?.following.length
-                            : '0'}
+                        1500
                     </Typography>
                     <Typography>following</Typography>
                 </Stack>
@@ -482,4 +393,4 @@ function Profile() {
     );
 }
 
-export default Profile;
+export default OtherUserProfile;
