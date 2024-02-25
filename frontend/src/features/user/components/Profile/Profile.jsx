@@ -19,36 +19,52 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { Link as RouterLink, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectPosts } from '../../../post/postSlice';
-import {
-    getUserProfileOfOtherUser,
-    selectUser,
-    updateUserProfile,
-} from '../../userSlice';
+import { selectUser, updateUserProfile } from '../../userSlice';
 import { AlternateEmail } from '@mui/icons-material';
+import ViewPhoto from '../../../common/ViewPhoto';
 
 function ImagesList({ user }) {
+    const [open, setOpen] = useState(false);
+    const [modalData, setModalData] = useState(null);
+    const handleClickOpen = (post) => {
+        setModalData(post);
+        setOpen(true);
+    };
+    const handleClose = () => {
+        setOpen(false);
+    };
     return (
         <>
             {user &&
                 user?.posts?.length > 0 &&
                 user.posts.map((post) => (
-                    <ImageListItem
-                        component={RouterLink}
-                        sx={{ width: 300 }}
-                        key={post._id}
-                        to={`/post/${post._id}`}>
-                        <img
-                            srcSet={`${post?.image?.url}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                            src={`${post?.image?.url}?w=164&h=164&fit=crop&auto=format`}
-                            alt={post?.content}
-                            loading="lazy"
-                        />
-                    </ImageListItem>
+                    <div key={post._id}>
+                        <ImageListItem
+                            sx={{ width: 300, cursor: 'pointer' }}
+                            onClick={() => {
+                                handleClickOpen(post);
+                            }}>
+                            <img
+                                srcSet={`${post?.image?.url}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                src={`${post?.image?.url}?w=164&h=164&fit=crop&auto=format`}
+                                alt={post?.content}
+                                loading="lazy"
+                            />
+                        </ImageListItem>
+                        <ViewPhoto
+                            setModalData={setModalData}
+                            postData={modalData}
+                            handleClose={handleClose}
+                            open={open}
+                            userProfileView={true}
+                            handleCloseProfileImageModal={
+                                handleClose
+                            }></ViewPhoto>
+                    </div>
                 ))}
         </>
     );
@@ -63,7 +79,6 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-//* This can be a common comp
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
     clipPath: 'inset(50%)',
@@ -293,7 +308,6 @@ function Profile() {
         setValue,
         formState: { errors },
     } = useForm();
-
     const user = useSelector(selectUser);
 
     const handleClickOpen = () => {
@@ -365,10 +379,10 @@ function Profile() {
                         </Stack>
                     </Stack>
                     <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                        {user?.bio || ' Science, Technology & Engineering'}
+                        {user?.interests || 'No Interests'}
                     </Typography>
                     <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                        {user?.interests || 'Bio'}
+                        {user?.bio || 'No, Bio'}
                     </Typography>
                     <Stack flexDirection={'row'} flexWrap={'wrap'}>
                         <Stack
@@ -388,11 +402,22 @@ function Profile() {
                                 {new Date(user?.createdAt).toDateString()}
                             </Typography>
                         </Stack>
+                        <Stack
+                            flexDirection={'row'}
+                            alignItems={'center'}
+                            sx={{ marginRight: '20px' }}>
+                            {' '}
+                            <AlternateEmail
+                                sx={{
+                                    width: '18px',
+                                    marginRight: '4px',
+                                }}></AlternateEmail>
+                            <Typography variant="body2">
+                                {user?.email}
+                            </Typography>
+                        </Stack>
                         {user?.website && (
-                            <Stack
-                                flexDirection={'row'}
-                                alignItems={'center'}
-                                sx={{ marginRight: '20px' }}>
+                            <Stack flexDirection={'row'} alignItems={'center'}>
                                 {' '}
                                 <InsertLinkIcon
                                     sx={{
@@ -411,17 +436,6 @@ function Profile() {
                                 </Typography>
                             </Stack>
                         )}
-                        <Stack flexDirection={'row'} alignItems={'center'}>
-                            {' '}
-                            <AlternateEmail
-                                sx={{
-                                    width: '18px',
-                                    marginRight: '4px',
-                                }}></AlternateEmail>
-                            <Typography variant="body2">
-                                {user?.email}
-                            </Typography>
-                        </Stack>
                     </Stack>
                 </Stack>
             </Stack>

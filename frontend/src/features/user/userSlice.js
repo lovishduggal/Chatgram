@@ -4,8 +4,8 @@ import toast from 'react-hot-toast';
 
 const initialState = {
     mode: 'light',
-    user: [],
-    otherUser: [],
+    user: null,
+    otherUser: null,
 };
 
 export const getUserProfile = createAsyncThunk(
@@ -43,15 +43,39 @@ export const updateUserProfile = createAsyncThunk(
 export const getUserProfileOfOtherUser = createAsyncThunk(
     'post/getUserProfileOfOtherUser',
     async (data) => {
-        const { userId } = data;
+        const { otherUserId } = data;
         try {
-            const response = await axiosInstance.get(`/user/${userId}`);
+            const response = await axiosInstance.get(`/user/${otherUserId}`);
             return response.data;
         } catch (error) {
             toast.error(error.response.data.message);
         }
     }
 );
+
+export const follow = createAsyncThunk('post/follow', async (data) => {
+    const { otherUserId } = data;
+    try {
+        const response = await axiosInstance.post(
+            `/user/follow/${otherUserId}`
+        );
+        return response.data;
+    } catch (error) {
+        toast.error(error.response.data.message);
+    }
+});
+
+export const unFollow = createAsyncThunk('post/follow', async (data) => {
+    const { otherUserId } = data;
+    try {
+        const response = await axiosInstance.post(
+            `/user/unfollow/${otherUserId}`
+        );
+        return response.data;
+    } catch (error) {
+        toast.error(error.response.data.message);
+    }
+});
 
 const userSlice = createSlice({
     name: 'user',

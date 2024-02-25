@@ -5,42 +5,46 @@ import {
     Stack,
     Typography,
     Link,
-    CardMedia,
-    TextField,
+    CircularProgress,
 } from '@mui/material';
 import ImageListItem from '@mui/material/ImageListItem';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import InsertLinkIcon from '@mui/icons-material/InsertLink';
-import { styled } from '@mui/material/styles';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectPosts } from '../../../post/postSlice';
 import {
+    follow,
+    getUserProfile,
     getUserProfileOfOtherUser,
     selectOtherUser,
-    selectUser,
+    unFollow,
 } from '../../userSlice';
+import { AlternateEmail } from '@mui/icons-material';
+import { selectUserId } from '../../../auth/authSlice';
+import ViewPhoto from '../../../common/ViewPhoto';
 
-function ImagesList({ user }) {
+function ImagesList({ otherUser }) {
+    const [open, setOpen] = useState(false);
+    const [modalData, setModalData] = useState(null);
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+    const handleClose = () => {
+        setOpen(false);
+    };
     return (
         <>
-            {user &&
-                user?.posts?.length > 0 &&
-                user.posts.map((post) => (
+            {otherUser &&
+                otherUser?.posts?.length > 0 &&
+                otherUser.posts.map((post) => (
                     <ImageListItem
-                        component={RouterLink}
-                        sx={{ width: 300 }}
+                        sx={{ width: 300, cursor: 'pointer' }}
                         key={post._id}
-                        to={`/post/${post._id}`}>
+                        onClick={() => {
+                            setModalData(post);
+                            handleClickOpen();
+                        }}>
                         <img
                             srcSet={`${post?.image?.url}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                             src={`${post?.image?.url}?w=164&h=164&fit=crop&auto=format`}
@@ -49,347 +53,261 @@ function ImagesList({ user }) {
                         />
                     </ImageListItem>
                 ))}
+            <ViewPhoto setModalData={setModalData}
+                postData={modalData}
+                handleClose={handleClose}
+                open={open}
+                otherUserProfileView={true}></ViewPhoto>
         </>
     );
 }
 
-const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-    '& .MuiDialogContent-root': {
-        padding: theme.spacing(2),
-    },
-    '& .MuiDialogActions-root': {
-        padding: theme.spacing(1),
-    },
-}));
-
-//* This can be a common comp
-const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1,
-});
-
-function EditProfileDialog({ open, handleClose }) {
-    const {
-        register,
-        handleSubmit,
-        reset,
-        formState: { errors },
-    } = useForm();
-    const [previewImage, setPreviewImage] = useState('');
-
-    function uploadImage(e) {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = function () {
-            setPreviewImage(reader.result);
-        };
-    }
-
-    function onSubmit(data) {
-        const formData = new FormData();
-        console.log('API', data);
-        handleClose();
-        reset();
-    }
-    return (
-        <BootstrapDialog
-            spacing={1}
-            component={'form'}
-            noValidate
-            onClose={handleClose}
-            onSubmit={handleSubmit((data) => onSubmit(data))}
-            aria-labelledby="customized-dialog-title"
-            open={open}>
-            <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-                Edit OtherUserProfile
-            </DialogTitle>
-            <IconButton
-                aria-label="close"
-                onClick={handleClose}
-                sx={{
-                    position: 'absolute',
-                    right: 8,
-                    top: 8,
-                    color: (theme) => theme.palette.grey[500],
-                }}>
-                <CloseIcon />
-            </IconButton>
-            <DialogContent dividers>
-                <Stack
-                    alignItems={'center'}
-                    spacing={1}
-                    sx={{ marginBottom: 2 }}>
-                    <CardMedia
-                        sx={{
-                            borderRadius: '50%',
-                            width: '150px',
-                            height: '150px',
-                        }}
-                        component="img"
-                        height="auto"
-                        image={
-                            previewImage
-                                ? previewImage
-                                : 'https://pbs.twimg.com/profile_images/1605145946274160640/kgPFhFbm_400x400.jpg'
-                        }
-                        alt="change image"
-                    />
-                    <Stack justifyContent={'center'} alignItems={'center'}>
-                        {' '}
-                        <Button
-                            size="small"
-                            component="label"
-                            role={undefined}
-                            variant="contained"
-                            tabIndex={-1}
-                            startIcon={<CloudUploadIcon />}
-                            onChange={uploadImage}>
-                            Change Image
-                            <VisuallyHiddenInput
-                                {...register('image')}
-                                type="file"
-                            />
-                        </Button>
-                    </Stack>
-                </Stack>
-                <TextField
-                    sx={{
-                        width: '100%',
-                        border: 'none',
-                        outline: 'none',
-                        '& fieldset': { border: 'none' },
-                        marginBottom: 2,
-                    }}
-                    id="name"
-                    multiline
-                    placeholder="Name"
-                    variant="standard"
-                    {...register('name', {
-                        required: 'Name is required',
-                    })}
-                    error={errors?.name?.message ? true : false}
-                    helperText={errors?.name?.message}
-                />
-                <TextField
-                    sx={{
-                        width: '100%',
-                        border: 'none',
-                        outline: 'none',
-                        '& fieldset': { border: 'none' },
-                        marginBottom: 2,
-                    }}
-                    id="bio"
-                    multiline
-                    placeholder="Bio"
-                    variant="standard"
-                    {...register('bio')}
-                />
-                <TextField
-                    sx={{
-                        width: '100%',
-                        border: 'none',
-                        outline: 'none',
-                        '& fieldset': { border: 'none' },
-                        marginBottom: 2,
-                    }}
-                    id="website"
-                    multiline
-                    placeholder="Website"
-                    variant="standard"
-                    {...register('website')}
-                />
-            </DialogContent>
-            <DialogActions>
-                <Button type="submit" variant="contained">
-                    Save changes
-                </Button>
-            </DialogActions>
-        </BootstrapDialog>
-    );
-}
-
 function OtherUserProfile() {
-    const [open, setOpen] = useState(false);
-    const [checked, setChecked] = useState(false);
-    const userId = useParams().id;
     const dispatch = useDispatch();
-    const user = useSelector(selectOtherUser);
-    console.log(userId);
+    const otherUserId = useParams().id;
+    const otherUser = useSelector(selectOtherUser);
+    const loggedInUserId = useSelector(selectUserId);
+    console.log(otherUserId);
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-    const handleClose = () => {
-        setOpen(false);
-    };
-    function handleFollow(e) {
+    async function handleFollow(e) {
         console.log('Handle follow API here', e.currentTarget.dataset.myValue);
-        setChecked(!checked);
+        if (e.currentTarget.dataset.myValue === 'follow')
+            await dispatch(follow({ otherUserId }));
+        else await dispatch(unFollow({ otherUserId }));
+        dispatch(getUserProfileOfOtherUser({ otherUserId }));
+        dispatch(getUserProfile({ userId: loggedInUserId }));
+    }
+
+    function search(loggedInUserId, arrOfObjsFollowers) {
+        for (let i = 0; i < arrOfObjsFollowers?.length; i++) {
+            if (arrOfObjsFollowers[i]?._id === loggedInUserId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     useEffect(() => {
-        if (userId) {
-            dispatch(getUserProfileOfOtherUser({ userId }));
+        if (otherUserId) {
+            dispatch(getUserProfileOfOtherUser({ otherUserId }));
         }
-    }, [dispatch, userId]);
+    }, [dispatch, otherUserId]);
     return (
-        <Box bgcolor={'background.default'} color={'text.primary'}>
-            <Stack
-                sx={{
-                    margin: 2,
-                    gap: { xs: 5, md: 10 },
-                    flexDirection: { md: 'row' },
-                }}
-                flexDirection={'row'}
-                justifyContent={'space-between'}
-                alignItems={'center'}>
-                <Avatar
-                    sx={{ width: '150px', height: '150px' }}
-                    alt="Lovish Duggal"
-                    src="https://pbs.twimg.com/profile_images/1605145946274160640/kgPFhFbm_400x400.jpg"></Avatar>
-                <Stack sx={{ width: 1 }}>
+        <>
+            {otherUser ? (
+                <Box bgcolor={'background.default'} color={'text.primary'}>
                     <Stack
                         sx={{
-                            marginBottom: 3,
-                            gap: '5px',
+                            margin: 2,
+                            gap: { xs: 5, md: 10 },
                             flexDirection: { md: 'row' },
-                            alignItems: { md: 'center' },
                         }}
-                        justifyContent={'space-between'}>
-                        <Typography variant="h6">Lovish Duggal</Typography>
-                        <Stack flexDirection={'row'} alignItems={'center'}>
-                            {checked ? (
-                                <Button
-                                    sx={{ marginRight: '5px' }}
-                                    data-my-value="unfollow"
-                                    onClick={handleFollow}
-                                    size="small"
-                                    variant="contained"
-                                    color="primary">
-                                    Unfollow
-                                </Button>
-                            ) : (
-                                <Button
-                                    sx={{ marginRight: '5px' }}
-                                    data-my-value="unfollow"
-                                    onClick={handleFollow}
-                                    size="small"
-                                    variant="contained"
-                                    color="primary">
-                                    Follow
-                                </Button>
+                        flexDirection={'row'}
+                        justifyContent={'space-between'}
+                        alignItems={'center'}>
+                        <Avatar
+                            sx={{
+                                width: '150px',
+                                height: '150px',
+                                bgcolor: 'text.primary',
+                            }}
+                            alt={otherUser?.fullName}
+                            src={otherUser?.profilePicture?.url}>
+                            {otherUser?.fullName && (
+                                <Typography variant="h1">
+                                    {otherUser?.fullName[0]}
+                                </Typography>
                             )}
-                            <Button
-                                color="primary"
-                                size="small"
-                                variant="outlined"
-                                onClick={handleClickOpen}>
-                                Edit OtherUserProfile
-                            </Button>
-                            <EditProfileDialog
-                                open={open}
-                                handleClose={handleClose}></EditProfileDialog>
-                        </Stack>
-                    </Stack>
-                    <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                        Lovish Duggal is a software engineer and a student at
-                        University of Toronto. Lorem ipsum dolor sit amet
-                        consectetur adipisicing elit.
-                    </Typography>
-                    <Stack flexDirection={'row'} flexWrap={'wrap'}>
-                        <Stack
-                            sx={{ marginRight: '20px' }}
-                            flexDirection={'row'}
-                            alignItems={'center'}
-                            alignContent={'center'}>
-                            {' '}
-                            <CalendarMonthIcon
+                        </Avatar>
+                        <Stack sx={{ width: 1 }}>
+                            <Stack
                                 sx={{
-                                    width: '18px',
-                                    marginRight: '4px',
-                                }}></CalendarMonthIcon>
-                            <Typography variant="body2">
-                                {' '}
-                                Joined {new Date().toDateString()}
+                                    marginBottom: 3,
+                                    gap: '5px',
+                                    flexDirection: { md: 'row' },
+                                    alignItems: { md: 'center' },
+                                }}
+                                justifyContent={'space-between'}>
+                                <Typography variant="h6">
+                                    {otherUser?.fullName}
+                                </Typography>
+                                <Stack
+                                    flexDirection={'row'}
+                                    alignItems={'center'}>
+                                    {search(
+                                        loggedInUserId,
+                                        otherUser?.followers
+                                    ) ? (
+                                        <Button
+                                            sx={{ marginRight: '5px' }}
+                                            data-my-value="unfollow"
+                                            onClick={handleFollow}
+                                            size="small"
+                                            variant="contained"
+                                            color="primary">
+                                            Unfollow
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            sx={{ marginRight: '5px' }}
+                                            data-my-value="follow"
+                                            onClick={handleFollow}
+                                            size="small"
+                                            variant="contained"
+                                            color="primary">
+                                            Follow
+                                        </Button>
+                                    )}
+                                </Stack>
+                            </Stack>
+                            <Typography
+                                variant="body2"
+                                sx={{ marginBottom: 1 }}>
+                                {otherUser?.interests}
                             </Typography>
-                        </Stack>
-                        <Stack flexDirection={'row'} alignItems={'center'}>
-                            {' '}
-                            <InsertLinkIcon
-                                sx={{
-                                    width: '18px',
-                                    marginRight: '4px',
-                                }}></InsertLinkIcon>
-                            <Typography variant="body2">
-                                {' '}
-                                <Link
-                                    component={RouterLink}
-                                    to="https://t.co/tHBDZAWKvl"
-                                    target="_blank">
+                            <Typography
+                                variant="body2"
+                                sx={{ marginBottom: 1 }}>
+                                {otherUser?.bio}
+                            </Typography>
+                            <Stack flexDirection={'row'} flexWrap={'wrap'}>
+                                <Stack
+                                    sx={{ marginRight: '20px' }}
+                                    flexDirection={'row'}
+                                    alignItems={'center'}
+                                    alignContent={'center'}>
                                     {' '}
-                                    https://t.co/tHBDZAWKvl
-                                </Link>{' '}
-                            </Typography>
+                                    <CalendarMonthIcon
+                                        sx={{
+                                            width: '18px',
+                                            marginRight: '4px',
+                                        }}></CalendarMonthIcon>
+                                    <Typography variant="body2">
+                                        {' '}
+                                        Joined{' '}
+                                        {new Date(
+                                            otherUser?.createdAt
+                                        ).toDateString()}
+                                    </Typography>
+                                </Stack>
+                                <Stack
+                                    flexDirection={'row'}
+                                    alignItems={'center'}
+                                    sx={{ marginRight: '20px' }}>
+                                    {' '}
+                                    <AlternateEmail
+                                        sx={{
+                                            width: '18px',
+                                            marginRight: '4px',
+                                        }}></AlternateEmail>
+                                    <Typography variant="body2">
+                                        {otherUser?.email}
+                                    </Typography>
+                                </Stack>
+                                {otherUser?.website && (
+                                    <Stack
+                                        flexDirection={'row'}
+                                        alignItems={'center'}>
+                                        {' '}
+                                        <InsertLinkIcon
+                                            sx={{
+                                                width: '18px',
+                                                marginRight: '4px',
+                                            }}></InsertLinkIcon>
+                                        <Typography variant="body2">
+                                            {' '}
+                                            <Link
+                                                component={RouterLink}
+                                                to={otherUser?.website}
+                                                target="_blank">
+                                                {' '}
+                                                {otherUser?.website?.split(
+                                                    'https://www.'
+                                                )}
+                                            </Link>{' '}
+                                        </Typography>
+                                    </Stack>
+                                )}
+                            </Stack>
                         </Stack>
                     </Stack>
-                </Stack>
-            </Stack>
-            <Stack
-                flexDirection={'row'}
-                alignItems={'center'}
-                justifyContent={'space-around'}
-                sx={{
-                    paddingY: { xs: 1, md: 2 },
-                    borderTop: 1,
-                    borderBottom: 1,
-                    margin: 2,
-                }}>
-                <Stack
-                    alignItems={'center'}
-                    sx={{ flexDirection: { md: 'row' } }}>
-                    <Typography
-                        sx={{ marginRight: { md: '5px' }, fontWeight: '500' }}>
-                        1500
-                    </Typography>
-                    <Typography>user</Typography>
-                </Stack>
-                <Stack
-                    alignItems={'center'}
-                    sx={{ flexDirection: { md: 'row' } }}>
-                    {' '}
-                    <Typography
-                        sx={{ marginRight: { md: '5px' }, fontWeight: '500' }}>
-                        1500
-                    </Typography>
-                    <Typography>followers</Typography>
-                </Stack>
-                <Stack
-                    alignItems={'center'}
-                    sx={{ flexDirection: { md: 'row' } }}>
-                    {' '}
-                    <Typography
-                        sx={{ marginRight: { md: '5px' }, fontWeight: '500' }}>
-                        1500
-                    </Typography>
-                    <Typography>following</Typography>
-                </Stack>
-            </Stack>
-            <Stack
-                justifyContent={'center'}
-                flexDirection={'row'}
-                flexWrap={'wrap'}
-                sx={{ gap: 1 }}>
-                <ImagesList user={user}></ImagesList>
-            </Stack>
-        </Box>
+                    <Stack
+                        flexDirection={'row'}
+                        alignItems={'center'}
+                        justifyContent={'space-around'}
+                        sx={{
+                            paddingY: { xs: 1, md: 2 },
+                            borderTop: 1,
+                            borderBottom: 1,
+                            margin: 2,
+                        }}>
+                        <Stack
+                            alignItems={'center'}
+                            sx={{ flexDirection: { md: 'row' } }}>
+                            <Typography
+                                sx={{
+                                    marginRight: { md: '5px' },
+                                    fontWeight: '500',
+                                }}>
+                                {otherUser?.posts && otherUser?.posts.length > 0
+                                    ? otherUser?.posts.length
+                                    : '0'}
+                            </Typography>
+                            <Typography>posts</Typography>
+                        </Stack>
+                        <Stack
+                            alignItems={'center'}
+                            sx={{ flexDirection: { md: 'row' } }}>
+                            {' '}
+                            <Typography
+                                sx={{
+                                    marginRight: { md: '5px' },
+                                    fontWeight: '500',
+                                }}>
+                                {otherUser?.followers &&
+                                otherUser?.followers.length > 0
+                                    ? otherUser?.followers.length
+                                    : '0'}
+                            </Typography>
+                            <Typography>followers</Typography>
+                        </Stack>
+                        <Stack
+                            alignItems={'center'}
+                            sx={{ flexDirection: { md: 'row' } }}>
+                            {' '}
+                            <Typography
+                                sx={{
+                                    marginRight: { md: '5px' },
+                                    fontWeight: '500',
+                                }}>
+                                {otherUser?.following &&
+                                otherUser?.following.length > 0
+                                    ? otherUser?.following.length
+                                    : '0'}
+                            </Typography>
+                            <Typography>following</Typography>
+                        </Stack>
+                    </Stack>
+                    <Stack
+                        justifyContent={'center'}
+                        flexDirection={'row'}
+                        flexWrap={'wrap'}
+                        sx={{ gap: 1 }}>
+                        <ImagesList otherUser={otherUser}></ImagesList>
+                    </Stack>
+                </Box>
+            ) : (
+                <CircularProgress
+                    sx={{
+                        position: 'relative',
+                        top: '50%',
+                        left: '50%',
+                        translate: '0 200px',
+                    }}
+                    variant="indeterminate"
+                />
+            )}
+        </>
     );
 }
 

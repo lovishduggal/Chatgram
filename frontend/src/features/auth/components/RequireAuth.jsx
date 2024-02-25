@@ -1,7 +1,9 @@
+import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
+import { selectLoggedInUser } from '../authSlice';
 
 function RequireAuth({ children }) {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const isLoggedIn = useSelector(selectLoggedInUser);
     if (!isLoggedIn) return <Navigate to={'/login'} replace={true}></Navigate>;
     return children;
 }

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -8,8 +9,10 @@ import LogInPage from './pages/LogInPage.jsx';
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    checkLoggedIn,
+    checkLoggedInUser,
+    selectCheckLoggedIn,
     selectLoggedInUser,
+    selectUserId,
 } from './features/auth/authSlice.js';
 import RequireAuth from './features/auth/components/RequireAuth.jsx';
 import Home from './pages/Home.jsx';
@@ -17,10 +20,9 @@ import CssBaseline from '@mui/material/CssBaseline';
 import ProfilePage from './pages/ProfilePage.jsx';
 import NotificationPage from './pages/NotificationPage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
-import { Box, createTheme } from '@mui/material';
+import { Box, CircularProgress, createTheme } from '@mui/material';
 import { getUserProfile, selectMode } from './features/user/userSlice.js';
 import CreatePostPage from './pages/CreatePostPage.jsx';
-import PostByIdPage from './pages/PostByIdPage.jsx';
 import { getAllPost } from './features/post/postSlice.js';
 import OtherUserProfilePage from './pages/OtherUserProfilePage.jsx';
 
@@ -53,10 +55,7 @@ const router = createBrowserRouter([
         path: '/create-post',
         element: <CreatePostPage></CreatePostPage>,
     },
-    {
-        path: '/posts/:id',
-        element: <PostByIdPage></PostByIdPage>,
-    },
+
     {
         path: '/search',
         element: <SearchPage></SearchPage>,
@@ -70,26 +69,45 @@ function App() {
     const mode = useSelector(selectMode);
     const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
     const dispatch = useDispatch();
-    const getLoggedInValue = localStorage.getItem('isLoggedIn');
-    const getUserIdValue = localStorage.getItem('userId');
     const isLoggedIn = useSelector(selectLoggedInUser);
+    const userId = useSelector(selectUserId);
+    const checkLoggedIn = useSelector(selectCheckLoggedIn);
 
     useEffect(() => {
-        if (isLoggedIn || getLoggedInValue) {
-            console.log('hii');
-            dispatch(checkLoggedIn({ getLoggedInValue, getUserIdValue })); //* Persist the loggedIn state
+        (async () => {
+            await dispatch(checkLoggedInUser());
+        })();
+    });
+
+    useEffect(() => {
+        if (isLoggedIn && userId) {
             dispatch(getAllPost());
-            dispatch(getUserProfile({ userId: getUserIdValue }));
+            dispatch(getUserProfile({ userId }));
         }
-    }, [dispatch, getLoggedInValue, isLoggedIn, getUserIdValue]);
+    }, [dispatch, isLoggedIn, userId]);
+
     return (
         <div className="app">
             {' '}
             <ThemeProvider theme={theme}>
                 <Box bgcolor={'background.default'} color={'text.primary'}>
                     <CssBaseline />
-                    <RouterProvider router={router} />
-                    <Toaster />
+                    {checkLoggedIn ? (
+                        <>
+                            <RouterProvider router={router} />
+                            <Toaster />
+                        </>
+                    ) : (
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                height: '100vh',
+                            }}>
+                            <CircularProgress />
+                        </Box>
+                    )}
                 </Box>
             </ThemeProvider>
         </div>

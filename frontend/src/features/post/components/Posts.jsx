@@ -6,11 +6,11 @@ import { selectUserId } from '../../auth/authSlice';
 
 function Posts() {
     const posts = useSelector(selectPosts);
-    const userId = useSelector(selectUserId);
+    const loggedInUserId = useSelector(selectUserId);
 
-    function search(userId, arrOfObjsLikes) {
+    function search(loggedInUserId, arrOfObjsLikes) {
         for (let i = 0; i < arrOfObjsLikes.length; i++) {
-            if (arrOfObjsLikes[i].user === userId) {
+            if (arrOfObjsLikes[i].user === loggedInUserId) {
                 return true;
             }
         }
@@ -24,8 +24,8 @@ function Posts() {
                         key={post._id}
                         postId={post._id}
                         data={post}
-                        allowed={userId === post.user._id}
-                        isLikedByUser={search(userId, post.likes)}></Post>
+                        allowed={loggedInUserId === post.user._id}
+                        isLikedByUser={search(loggedInUserId, post.likes)}></Post>
                 ))
             ) : (
                 <CircularProgress

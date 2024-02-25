@@ -23,7 +23,6 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -45,7 +44,10 @@ import {
     unLikePost,
 } from '../../like/likeSlice';
 import { Link as RouterLink } from 'react-router-dom';
-import { getUserProfile } from '../../user/userSlice';
+import {
+    getUserProfile,
+    getUserProfileOfOtherUser,
+} from '../../user/userSlice';
 
 const options = ['Edit', 'Delete'];
 const ITEM_HEIGHT = 40;
@@ -53,9 +55,10 @@ const ITEM_HEIGHT = 40;
 function MenuLong({
     setIsEditing,
     setOpenCommentDialog,
-    reset,
     data,
     setValue,
+    userProfileView,
+    handleCloseProfileImageModal,
 }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const dispatch = useDispatch();
@@ -69,13 +72,14 @@ function MenuLong({
             setValue('caption', data.content);
             setIsEditing(true);
             setOpenCommentDialog(false);
-            // reset(); Later we will see this is required or not.
         }
 
         if (e.currentTarget.dataset.myValue === 'Delete') {
             await dispatch(deletePost({ postId: data._id }));
-            dispatch(getUserProfile({ userId: data?.user?._id }));
-            // reset(); Later we will see this is required or not.
+            await dispatch(getUserProfile({ userId: data?.user?._id }));
+            if (userProfileView) {
+                handleCloseProfileImageModal();
+            }
         }
         setAnchorEl(null);
     };
@@ -186,13 +190,40 @@ function ListOfLikes() {
     );
 }
 
-function ListOfComments({ postId }) {
+function ListOfComments({
+    postId,
+    data,
+    search,
+    setModalData,
+    userProfileView = false,
+    otherUserProfileView = false,
+}) {
     const comments = useSelector(selectComments);
     const userId = useSelector(selectUserId);
     const dispatch = useDispatch();
     async function handleDelete(commentId) {
         await dispatch(deleteComment({ postId, commentId }));
         dispatch(getAllPost());
+
+        const { payload } = await dispatch(
+            getUserProfile({ userId: data?.user?._id })
+        );
+        if (userProfileView && payload?.success) {
+            const { user } = payload;
+            setModalData(search(postId, user.posts));
+        }
+
+        if (otherUserProfileView) {
+            const { payload } = await dispatch(
+                getUserProfileOfOtherUser({
+                    otherUserId: data?.user?._id,
+                })
+            );
+            if (payload?.success) {
+                const { user } = payload;
+                setModalData(search(postId, user.posts));
+            }
+        }
     }
     return (
         <List
@@ -224,7 +255,7 @@ function ListOfComments({ postId }) {
                             <Stack flexDirection={'row'} alignItems={'center'}>
                                 <Avatar
                                     alt={comment?.user?.fullName}
-                                    src={comment?.user?.profilePicture}
+                                    src={comment?.user?.profilePicture?.url}
                                     sx={{
                                         bgcolor: 'text.primary',
                                         width: 32,
@@ -276,7 +307,17 @@ function ListOfComments({ postId }) {
     );
 }
 
-function Post({ postId, data, allowed, isLikedByUser }) {
+function Post({
+    postId,
+    data,
+    allowed,
+    isLikedByUser,
+    margY,
+    setModalData,
+    userProfileView = false,
+    otherUserProfileView = false,
+    handleCloseProfileImageModal,
+}) {
     const {
         register,
         handleSubmit,
@@ -289,6 +330,14 @@ function Post({ postId, data, allowed, isLikedByUser }) {
     const [openCommentsModal, setOpenCommentsModal] = useState(false);
     const [openLikesModal, setOpenLikesModal] = useState(false);
     const dispatch = useDispatch();
+
+    function search(postId, arrOfObjsPosts) {
+        for (let i = 0; i < arrOfObjsPosts.length; i++) {
+            if (arrOfObjsPosts[i]._id === postId) {
+                return arrOfObjsPosts[i];
+            }
+        }
+    }
 
     function handleOpenLikes() {
         dispatch(getAllLikes({ postId }));
@@ -314,6 +363,26 @@ function Post({ postId, data, allowed, isLikedByUser }) {
         if (e.target.checked) await dispatch(likePost({ postId }));
         else await dispatch(unLikePost({ postId }));
         dispatch(getAllPost());
+
+        const { payload } = await dispatch(
+            getUserProfile({ userId: data?.user?._id })
+        );
+        if (userProfileView && payload?.success) {
+            const { user } = payload;
+            setModalData(search(postId, user.posts));
+        }
+
+        if (otherUserProfileView) {
+            const { payload } = await dispatch(
+                getUserProfileOfOtherUser({
+                    otherUserId: data?.user?._id,
+                })
+            );
+            if (payload?.success) {
+                const { user } = payload;
+                setModalData(search(postId, user.posts));
+            }
+        }
     }
 
     function handleCommentDialog() {
@@ -328,18 +397,48 @@ function Post({ postId, data, allowed, isLikedByUser }) {
         reset();
     }
 
-    async function handleSubmitted(data) {
-        const { addComment, caption } = data;
+    async function handleSubmitted(formData) {
+        const { addComment, caption } = formData;
 
         if (addComment) {
-            console.log('comment', data);
-            await dispatch(createComment({ content: data.addComment, postId }));
+            console.log('comment', formData);
+            await dispatch(
+                createComment({ content: formData.addComment, postId })
+            );
             dispatch(getAllPost());
+
+            const { payload } = await dispatch(
+                getUserProfile({ userId: data?.user?._id })
+            );
+            if (userProfileView && payload?.success) {
+                const { user } = payload;
+                setModalData(search(postId, user.posts));
+            }
+
+            if (otherUserProfileView) {
+                const { payload } = await dispatch(
+                    getUserProfileOfOtherUser({
+                        otherUserId: data?.user?._id,
+                    })
+                );
+                if (payload?.success) {
+                    const { user } = payload;
+                    setModalData(search(postId, user.posts));
+                }
+            }
             setOpenCommentDialog(false);
             reset();
         } else if (caption) {
-            console.log('caption', data.caption);
-            dispatch(updatePost({ content: data.caption, postId }));
+            console.log('caption', formData.caption);
+            dispatch(updatePost({ content: formData.caption, postId }));
+            dispatch(getAllPost());
+            const { payload } = await dispatch(
+                getUserProfile({ userId: data?.user?._id })
+            );
+            if (userProfileView && payload?.success) {
+                const { user } = payload;
+                setModalData(search(postId, user.posts));
+            }
             setIsEditing(false);
             reset();
         }
@@ -351,7 +450,7 @@ function Post({ postId, data, allowed, isLikedByUser }) {
             noValidate
             onSubmit={handleSubmit((data) => handleSubmitted(data))}
             sx={{
-                marginY: 3,
+                marginY: `${margY ? margY : 24}px`,
                 maxWidth: '400px',
                 boxShadow: 4,
                 position: 'relative',
@@ -378,12 +477,17 @@ function Post({ postId, data, allowed, isLikedByUser }) {
                             setOpenCommentDialog={setOpenCommentDialog}
                             setValue={setValue}
                             data={data}
-                            reset={reset}></MenuLong>
+                            userProfileView={userProfileView}
+                            handleCloseProfileImageModal={
+                                handleCloseProfileImageModal
+                            }></MenuLong>
                     )
                 }
                 title={
                     <Link
-                        to={allowed ? `/profile` : `/profile/${data.user._id}`}
+                        to={
+                            allowed ? `/profile` : `/profile/${data?.user?._id}`
+                        }
                         component={RouterLink}
                         underline="none"
                         color={'text.primary'}
@@ -393,7 +497,7 @@ function Post({ postId, data, allowed, isLikedByUser }) {
                 }
                 subheader={
                     <Typography variant="caption">
-                        {new Date(data.createdAt).toDateString()}
+                        {new Date(data?.createdAt).toDateString()}
                     </Typography>
                 }
             />
@@ -555,7 +659,15 @@ function Post({ postId, data, allowed, isLikedByUser }) {
                                 border: 'none',
                                 p: 2,
                             }}>
-                            <ListOfComments postId={postId}></ListOfComments>
+                            <ListOfComments
+                                postId={postId}
+                                data={data}
+                                search={search}
+                                setModalData={setModalData}
+                                userProfileView={userProfileView}
+                                otherUserProfileView={
+                                    otherUserProfileView
+                                }></ListOfComments>
                         </Box>
                     </Modal>
                 </Stack>
