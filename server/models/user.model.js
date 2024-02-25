@@ -30,6 +30,8 @@ const schema = new mongoose.Schema(
             },
         },
         bio: String,
+        website: String,
+        interests: String,
         followers: [
             {
                 type: mongoose.Schema.Types.ObjectId,

@@ -17,6 +17,10 @@ const storage = new CloudinaryStorage({
         },
         transformation: {
             quality: 'auto',
+            width: 400,
+            height: 400,
+            gravity: 'faces',
+            crop: 'fill',
         },
     },
 });

@@ -23,6 +23,7 @@ const handleCreateComment = catchAsyncError(async (req, res, next) => {
 
     return res.status(201).json({
         success: true,
+        message: 'Comment posted',
         newComment,
     });
 });
@@ -59,8 +60,7 @@ const handleDeleteComment = catchAsyncError(async (req, res, next) => {
     const postId = req.params.postId; // Get ID of the post
     const commentId = req.params.commentId; // Get ID of the comment
     const comment = await Comment.findById(commentId);
-    console.log(comment, commentId, postId);
-    console.log(!comment || comment.post.toString() !== postId);
+
     if (!comment || comment.post.toString() !== postId) {
         // Ensure comment belongs to post
         return next(new ErrorHandler('Comment not found', 404));
@@ -74,7 +74,8 @@ const handleDeleteComment = catchAsyncError(async (req, res, next) => {
 
     return res.status(200).json({
         success: true,
-        comment,
+        message: 'Comment deleted successfully',
+        deletedComment: comment,
     });
 });
 export {

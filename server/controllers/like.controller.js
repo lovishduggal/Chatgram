@@ -2,6 +2,16 @@ import { catchAsyncError } from '../middlewares/catchAsyncError.js';
 import { Like } from '../models/like.model.js';
 import { Post } from '../models/post.model.js';
 import ErrorHandler from '../utils/customErrorClass.js';
+
+const handleGetAllLikes = catchAsyncError(async (req, res) => {
+    const postId = req.params.postId; // Get ID of the post
+    const likes = await Like.find({ post: postId }).populate('user'); // Populate all info of user
+    return res.status(200).json({
+        success: true,
+        likes,
+    });
+});
+
 const handleLikePost = catchAsyncError(async (req, res, next) => {
     const userId = req.user._id; // Get ID of the current post
     const postId = req.params.postId; // Get ID of the post
@@ -49,4 +59,4 @@ const handleUnLikePost = catchAsyncError(async (req, res, next) => {
         success: true,
     });
 });
-export { handleLikePost, handleUnLikePost };
+export { handleGetAllLikes, handleLikePost, handleUnLikePost };

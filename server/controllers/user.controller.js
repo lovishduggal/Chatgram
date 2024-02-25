@@ -47,13 +47,25 @@ const handleUnfollow = catchAsyncError(async (req, res, next) => {
 
 const handleGetUserProfile = catchAsyncError(async (req, res, next) => {
     const userId = req.params.userId;
-    const user = await User.findById(userId).populate({
-        path: 'posts',
-        options: {
-            select: 'image',
-            sort: { createdAt: -1 }, // Sort by creation date (newest first)
-        },
-    }); // .populate('posts') will do later...
+    const user = await User.findById(userId)
+        .populate({
+            path: 'posts',
+            options: {
+                sort: { createdAt: -1 }, // Sort by creation date (newest first)
+            },
+            populate: [
+                {
+                    path: 'user',
+                    model: 'User',
+                },
+                {
+                    path: 'likes',
+                    model: 'Like',
+                },
+            ],
+        })
+        .populate('followers')
+        .populate('following'); // .populate('posts') will do later...
     if (!user) {
         return next(new ErrorHandler('User not found', 400));
     }
@@ -63,13 +75,22 @@ const handleGetUserProfile = catchAsyncError(async (req, res, next) => {
 
 const handleUpdateUserProfile = catchAsyncError(async (req, res, next) => {
     const userId = req.user._id;
-    const { name, bio } = req.body;
+    const { name, email, bio, website, interests } = req.body;
 
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ _id: userId }).populate({
+        path: 'posts',
+        options: {
+            select: 'image',
+            sort: { createdAt: -1 }, // Sort by creation date (newest first)
+        },
+    });
     if (!user) return next(new ErrorHandler('User not found', 400));
 
-    if (name) user.name = name;
+    if (name) user.fullName = name;
+    if (email) user.email = email;
     if (bio) user.bio = bio;
+    if (website) user.website = website;
+    if (interests) user.interests = interests;
 
     if (user.profilePicture.public_id && user.profilePicture.url)
         await cloudinary.v2.uploader.destroy(user.profilePicture.public_id, {
