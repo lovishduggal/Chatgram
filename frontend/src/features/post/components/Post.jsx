@@ -157,7 +157,7 @@ function ListOfLikes() {
                             gap={'5px'}>
                             <Avatar
                                 alt={like?.user?.fullName}
-                                src={like?.user?.profilePicture}
+                                src={like?.user?.profilePicture?.url}
                                 sx={{
                                     bgcolor: 'text.primary',
                                     width: 32,

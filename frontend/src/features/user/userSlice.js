@@ -81,8 +81,11 @@ const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        setMode: (state) => {
-            state.mode = state.mode === 'light' ? 'dark' : 'light';
+        setMode: (state, action) => {
+            if (!(state.mode === action.payload.mode)) {
+                state.mode = state.mode === 'light' ? 'dark' : 'light';
+                localStorage.setItem('mode', state.mode);
+            }
         },
     },
     extraReducers: (builder) => {
@@ -98,8 +101,8 @@ const userSlice = createSlice({
             });
     },
 });
-export const selectMode = (state) => state.user.mode;
 
+export const selectMode = (state) => state.user.mode;
 export const selectUser = (state) => state.user.user;
 export const selectOtherUser = (state) => state.user.otherUser;
 export const { setMode } = userSlice.actions;

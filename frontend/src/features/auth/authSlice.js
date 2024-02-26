@@ -3,8 +3,8 @@ import toast from 'react-hot-toast';
 import axiosInstance from '../../app/utils/axiosInstance';
 const initialState = {
     isLoggedIn: null,
+    jwt: null,
     userId: null,
-    checkLoggedIn: null,
 };
 
 export const signup = createAsyncThunk('auth/signup', async (data) => {
@@ -22,6 +22,7 @@ export const signup = createAsyncThunk('auth/signup', async (data) => {
         toast.error(error.response.data.message);
     }
 });
+
 export const login = createAsyncThunk('auth/signup', async (data) => {
     try {
         const response = axiosInstance.post('/auth/login', data);
@@ -38,8 +39,8 @@ export const login = createAsyncThunk('auth/signup', async (data) => {
     }
 });
 
-export const checkLoggedInUser = createAsyncThunk(
-    'auth/checkLoggedInUser',
+export const checkLoggedIn = createAsyncThunk(
+    'auth/checkLoggedIn',
     async () => {
         try {
             const response = await axiosInstance.get('/auth/check');
@@ -50,27 +51,53 @@ export const checkLoggedInUser = createAsyncThunk(
     }
 );
 
+export const logout = createAsyncThunk('auth/logout', async () => {
+    try {
+        const response = axiosInstance.get('/auth/logout');
+        toast.promise(response, {
+            loading: 'Logging out...',
+            success: (response) => {
+                return response?.data?.message;
+            },
+            error: 'Failed to logout the user',
+        });
+        return (await response).data;
+    } catch (error) {
+        toast.error(error.response.data.message);
+    }
+});
+
 const authSlice = createSlice({
     name: 'auth',
     initialState,
-    reducers: {},
+    reducers: {
+        setUser: (state, action) => {
+            state.isLoggedIn = action.payload.isLoggedIn;
+            state.jwt = action.payload.jwt;
+            state.userId = action.payload.userId;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(login.fulfilled, (state, action) => {
-                state.isLoggedIn = true;
+                state.isLoggedIn = action?.payload?.success;
+                state.jwt = action?.payload?.jwt;
                 state.userId = action?.payload?.userId;
-                // localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('isLoggedIn', true);
+                localStorage.setItem('jwt', action?.payload?.jwt);
+                localStorage.setItem('userId', action?.payload?.userId);
             })
-            .addCase(checkLoggedInUser.fulfilled, (state, action) => {
-                state.isLoggedIn = true;
-                state.checkLoggedIn = true;
-                state.userId = action?.payload?.userId;
-                // localStorage.setItem('isLoggedIn', 'true');
+            .addCase(logout.fulfilled, (state) => {
+                state.isLoggedIn = null;
+                state.userId = null;
+                state.jwt = null;
+                localStorage.clear();
             });
     },
 });
 
 export const selectLoggedInUser = (state) => state.auth.isLoggedIn;
+export const selectJwt = (state) => state.auth.jwt;
 export const selectUserId = (state) => state.auth.userId;
-export const selectCheckLoggedIn = (state) => state.auth.checkLoggedIn;
+export const { setUser } = authSlice.actions;
 export default authSlice.reducer;

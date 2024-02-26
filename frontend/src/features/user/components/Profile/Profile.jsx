@@ -23,9 +23,10 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectUser, updateUserProfile } from '../../userSlice';
+import { getUserProfile, selectUser, updateUserProfile } from '../../userSlice';
 import { AlternateEmail } from '@mui/icons-material';
 import ViewPhoto from '../../../common/ViewPhoto';
+import { getAllPost } from '../../../post/postSlice';
 
 function ImagesList({ user }) {
     const [open, setOpen] = useState(false);
@@ -100,6 +101,7 @@ function EditProfileDialog({
     handleSubmit,
     reset,
     errors,
+    userId,
 }) {
     const [previewImage, setPreviewImage] = useState('');
     const dispatch = useDispatch();
@@ -124,6 +126,8 @@ function EditProfileDialog({
 
         const { payload } = await dispatch(updateUserProfile(formData));
         if (payload.success) {
+            dispatch(getAllPost());
+            dispatch(getUserProfile({ userId }));
             handleClose();
             setPreviewImage('');
             reset();
@@ -375,7 +379,8 @@ function Profile() {
                                 register={register}
                                 handleSubmit={handleSubmit}
                                 reset={reset}
-                                errors={errors}></EditProfileDialog>
+                                errors={errors}
+                                userId={user?._id}></EditProfileDialog>
                         </Stack>
                     </Stack>
                     <Typography variant="body2" sx={{ marginBottom: 1 }}>
@@ -431,7 +436,9 @@ function Profile() {
                                         to={user?.website}
                                         target="_blank">
                                         {' '}
-                                        {user?.website?.split('https://www.')}
+                                        {new URL(
+                                            user?.website
+                                        ).hostname.replace('www.', '')}
                                     </Link>{' '}
                                 </Typography>
                             </Stack>

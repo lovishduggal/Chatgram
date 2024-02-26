@@ -14,8 +14,8 @@ import { useState } from 'react';
 import { Add, Home, Search, Notifications } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import Switcher from './Switcher';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import More from './More';
 const drawerWidth = 235;
 
 function ProfileAvatar({ color }) {
@@ -54,7 +54,7 @@ function TopBar() {
                     paddingX={'10px'}>
                     Pictogram
                 </Typography>
-                <Switcher></Switcher>
+                <More></More>
             </Toolbar>
         </AppBar>
     );
