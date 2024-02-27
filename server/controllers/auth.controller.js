@@ -40,6 +40,7 @@ const handleLogin = catchAsyncError(async (req, res, next) => {
     return res.status(200).cookie('jwt', token, options).json({
         success: true,
         message: 'Logged In Successfully',
+        jwt: token,
         userId: user._id,
     });
 });
@@ -50,7 +51,7 @@ const handleLogout = catchAsyncError(async (req, res, next) => {
         .clearCookie('jwt', { ...options, expires: new Date(Date.now()) })
         .json({
             success: true,
-            message: 'Logged Out Successfully',
+            message: 'Logged out successfully',
         });
 });
 
@@ -58,7 +59,6 @@ const handleCheck = catchAsyncError(async (req, res, next) => {
     const user = req.user;
     return res.status(200).json({
         success: true,
-        userId: user._id,
     });
 });
 
