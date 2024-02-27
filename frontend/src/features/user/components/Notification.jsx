@@ -1,5 +1,7 @@
+import { Box } from '@mui/material';
+
 function Notification() {
-    return <div>Notification</div>;
+    return <Box></Box>;
 }
 
 export default Notification;

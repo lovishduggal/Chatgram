@@ -7,7 +7,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { Container, Link } from '@mui/material';
+import { Badge, Container, Link } from '@mui/material';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import { useState } from 'react';
@@ -16,6 +16,8 @@ import { Avatar } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import More from './More';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../user/userSlice';
 const drawerWidth = 235;
 
 function ProfileAvatar({ color }) {
@@ -65,6 +67,7 @@ function LeftDrawer() {
     const [value, setValue] = useState(
         location.pathname === '/' ? 'home' : location.pathname.slice(1)
     );
+    const user = useSelector(selectUser);
     const handleListItemClick = (event, newValue) => {
         setValue(newValue);
     };
@@ -166,15 +169,19 @@ function LeftDrawer() {
                             handleListItemClick(event, 'notifications')
                         }>
                         <ListItemIcon>
-                            <Notifications
-                                sx={{
-                                    color: `${
-                                        value === 'notifications'
-                                            ? 'primary.main'
-                                            : 'text.primary'
-                                    }`,
-                                }}
-                            />
+                            <Badge
+                                color="secondary"
+                                badgeContent={user?.notifications?.length}>
+                                <Notifications
+                                    sx={{
+                                        color: `${
+                                            value === 'notifications'
+                                                ? 'primary.main'
+                                                : 'text.primary'
+                                        }`,
+                                    }}
+                                />
+                            </Badge>
                         </ListItemIcon>
                         <ListItemText primary="Notifications" />
                     </ListItemButton>

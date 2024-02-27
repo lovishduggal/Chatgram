@@ -23,7 +23,7 @@ export const signup = createAsyncThunk('auth/signup', async (data) => {
     }
 });
 
-export const login = createAsyncThunk('auth/signup', async (data) => {
+export const login = createAsyncThunk('auth/login', async (data) => {
     try {
         const response = axiosInstance.post('/auth/login', data);
         toast.promise(response, {
@@ -80,14 +80,16 @@ const authSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(login.fulfilled, (state, action) => {
+                localStorage.clear();
                 state.isLoggedIn = action?.payload?.success;
                 state.jwt = action?.payload?.jwt;
                 state.userId = action?.payload?.userId;
-                localStorage.setItem('isLoggedIn', true);
+                localStorage.setItem('isLoggedIn', action?.payload?.success);
                 localStorage.setItem('jwt', action?.payload?.jwt);
                 localStorage.setItem('userId', action?.payload?.userId);
             })
             .addCase(logout.fulfilled, (state) => {
+                localStorage.clear();
                 state.isLoggedIn = null;
                 state.userId = null;
                 state.jwt = null;
