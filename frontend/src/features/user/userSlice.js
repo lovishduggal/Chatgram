@@ -6,6 +6,7 @@ const initialState = {
     mode: 'light',
     user: null,
     otherUser: null,
+    notifications: [],
 };
 
 export const getUserProfile = createAsyncThunk(
@@ -14,6 +15,21 @@ export const getUserProfile = createAsyncThunk(
         const { userId } = data;
         try {
             const response = await axiosInstance.get(`/user/${userId}`);
+            return response.data;
+        } catch (error) {
+            toast.error(error.response.data.message);
+        }
+    }
+);
+
+export const getUserNotifications = createAsyncThunk(
+    'post/getUserNotifications',
+    async (data) => {
+        const { userId } = data;
+        try {
+            const response = await axiosInstance.get(
+                `/user/notifications/${userId}`
+            );
             return response.data;
         } catch (error) {
             toast.error(error.response.data.message);
@@ -93,6 +109,9 @@ const userSlice = createSlice({
             .addCase(getUserProfile.fulfilled, (state, action) => {
                 state.user = action.payload.user;
             })
+            .addCase(getUserNotifications.fulfilled, (state, action) => {
+                state.notifications = action.payload.notifications;
+            })
             .addCase(updateUserProfile.fulfilled, (state, action) => {
                 state.user = action.payload.user;
             })
@@ -105,5 +124,6 @@ const userSlice = createSlice({
 export const selectMode = (state) => state.user.mode;
 export const selectUser = (state) => state.user.user;
 export const selectOtherUser = (state) => state.user.otherUser;
+export const selectUserNotifications = (state) => state.user.notifications;
 export const { setMode } = userSlice.actions;
 export default userSlice.reducer;
