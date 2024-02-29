@@ -80,9 +80,10 @@ const handleGetUserProfile = catchAsyncError(async (req, res, next) => {
         .populate('followers')
         .populate('following'); // .populate('posts') will do later...
 
-    user.notifications = user.notifications.filter(
-        (notification) => !(notification.saw === true)
+    user.notifications = user?.notifications?.filter(
+        (notification) => !notification.saw === true
     );
+
     if (!user) {
         return next(new ErrorHandler('User not found', 400));
     }

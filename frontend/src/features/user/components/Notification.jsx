@@ -1,12 +1,14 @@
-import { Avatar, Box, Stack, Typography } from '@mui/material';
+import { Avatar, Link, Stack, Typography } from '@mui/material';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getUserNotifications,
     getUserProfile,
     selectUserNotifications,
+    setOtherUser,
 } from '../userSlice';
 import { selectUserId } from '../../auth/authSlice';
+import { Link as RouterLink } from 'react-router-dom';
 
 function Notification() {
     const dispatch = useDispatch();
@@ -16,53 +18,53 @@ function Notification() {
         if (userId) {
             (async () => {
                 await dispatch(getUserNotifications({ userId }));
+                dispatch(setOtherUser({}));
                 dispatch(getUserProfile({ userId }));
             })();
         }
     }, []);
     return (
-        <Box sx={{ width: 1, height: '100vh' }}>
-            <Stack justifyContent={'center'} flexDirection={'row'}>
-                <Box sx={{ width: '100%' }}>
-                    {userNotifications.map((notification) => (
-                        <Stack
+        <Stack alignItems={'center'} sx={{ width: 1, height: '100vh' }}>
+            <Stack>
+                {userNotifications.map((notification) => (
+                    <Link
+                        underline="none"
+                        to={`/profile/${notification?.user?._id}`}
+                        component={RouterLink}
+                        sx={{
+                            marginY: 1,
+                            bgcolor: `${
+                                notification?.saw ? 'none' : 'secondary.main'
+                            }`,
+                            padding: 1,
+                            borderRadius: 2,
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                        }}
+                        key={notification._id}>
+                        <Avatar
+                            alt={notification?.user?.fullName}
+                            src={notification?.user?.profilePicture?.url}
                             sx={{
-                                marginY: 2,
-                                bgcolor: `${
-                                    notification?.saw
-                                        ? 'none'
-                                        : 'secondary.main'
-                                }`,
-                                padding: 1,
-                                borderRadius: 2,
-                            }}
-                            key={notification._id}
-                            flexDirection={'row'}
-                            alignItems={'center'}>
-                            <Avatar
-                                alt={notification?.user?.fullName}
-                                src={notification?.user?.profilePicture?.url}
-                                sx={{
-                                    bgcolor: 'text.primary',
-                                    width: 56,
-                                    height: 56,
-                                    border: 2,
-                                    borderColor: '#E43D90',
-                                    marginRight: 2,
-                                }}>
-                                {' '}
-                                {notification?.fullName &&
-                                    notification.fullName[0]}
-                            </Avatar>
-                            <Typography variant="body1" color="text.primary">
-                                {notification?.user?.fullName}{' '}
-                                {notification?.action}
-                            </Typography>
-                        </Stack>
-                    ))}
-                </Box>
+                                bgcolor: 'text.primary',
+                                width: 56,
+                                height: 56,
+                                border: 2,
+                                borderColor: '#E43D90',
+                                marginRight: 2,
+                            }}>
+                            {' '}
+                            {notification?.fullName && notification.fullName[0]}
+                        </Avatar>
+                        <Typography variant="body1" color="text.primary">
+                            {notification?.user?.fullName}{' '}
+                            {notification?.action}
+                        </Typography>
+                    </Link>
+                ))}
             </Stack>
-        </Box>
+        </Stack>
     );
 }
 

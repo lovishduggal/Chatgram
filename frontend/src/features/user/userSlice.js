@@ -103,6 +103,9 @@ const userSlice = createSlice({
                 localStorage.setItem('mode', state.mode);
             }
         },
+        setOtherUser: (state) => {
+            state.otherUser = null;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -125,5 +128,5 @@ export const selectMode = (state) => state.user.mode;
 export const selectUser = (state) => state.user.user;
 export const selectOtherUser = (state) => state.user.otherUser;
 export const selectUserNotifications = (state) => state.user.notifications;
-export const { setMode } = userSlice.actions;
+export const { setMode, setOtherUser } = userSlice.actions;
 export default userSlice.reducer;

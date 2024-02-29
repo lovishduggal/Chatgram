@@ -18,6 +18,7 @@ import {
     getUserProfile,
     getUserProfileOfOtherUser,
     selectOtherUser,
+    setOtherUser,
     unFollow,
 } from '../../userSlice';
 import { AlternateEmail } from '@mui/icons-material';
@@ -53,7 +54,8 @@ function ImagesList({ otherUser }) {
                         />
                     </ImageListItem>
                 ))}
-            <ViewPhoto setModalData={setModalData}
+            <ViewPhoto
+                setModalData={setModalData}
                 postData={modalData}
                 handleClose={handleClose}
                 open={open}
@@ -88,9 +90,12 @@ function OtherUserProfile() {
     }
 
     useEffect(() => {
-        if (otherUserId) {
-            dispatch(getUserProfileOfOtherUser({ otherUserId }));
-        }
+        (async () => {
+            if (otherUserId) {
+                await dispatch(setOtherUser({}));
+                dispatch(getUserProfileOfOtherUser({ otherUserId }));
+            }
+        })();
     }, [dispatch, otherUserId]);
     return (
         <>
@@ -221,9 +226,9 @@ function OtherUserProfile() {
                                                 to={otherUser?.website}
                                                 target="_blank">
                                                 {' '}
-                                                {otherUser?.website?.split(
-                                                    'https://www.'
-                                                )}
+                                                {new URL(
+                                                    otherUser?.website
+                                                ).hostname.replace('www.', '')}
                                             </Link>{' '}
                                         </Typography>
                                     </Stack>

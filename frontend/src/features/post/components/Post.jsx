@@ -63,7 +63,7 @@ function MenuLong({
     const [anchorEl, setAnchorEl] = useState(null);
     const dispatch = useDispatch();
     const open = Boolean(anchorEl);
-
+    const userId = useSelector(selectUserId);
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -76,7 +76,7 @@ function MenuLong({
 
         if (e.currentTarget.dataset.myValue === 'Delete') {
             await dispatch(deletePost({ postId: data._id }));
-            await dispatch(getUserProfile({ userId: data?.user?._id }));
+            await dispatch(getUserProfile({ userId }));
             if (userProfileView) {
                 handleCloseProfileImageModal();
             }
@@ -201,13 +201,12 @@ function ListOfComments({
     const comments = useSelector(selectComments);
     const userId = useSelector(selectUserId);
     const dispatch = useDispatch();
+
     async function handleDelete(commentId) {
         await dispatch(deleteComment({ postId, commentId }));
         dispatch(getAllPost());
 
-        const { payload } = await dispatch(
-            getUserProfile({ userId: data?.user?._id })
-        );
+        const { payload } = await dispatch(getUserProfile({ userId }));
         if (userProfileView && payload?.success) {
             const { user } = payload;
             setModalData(search(postId, user.posts));
@@ -330,6 +329,7 @@ function Post({
     const [openCommentsModal, setOpenCommentsModal] = useState(false);
     const [openLikesModal, setOpenLikesModal] = useState(false);
     const dispatch = useDispatch();
+    const userId = useSelector(selectUserId);
 
     function search(postId, arrOfObjsPosts) {
         for (let i = 0; i < arrOfObjsPosts.length; i++) {
@@ -364,9 +364,7 @@ function Post({
         else await dispatch(unLikePost({ postId }));
         dispatch(getAllPost());
 
-        const { payload } = await dispatch(
-            getUserProfile({ userId: data?.user?._id })
-        );
+        const { payload } = await dispatch(getUserProfile({ userId }));
         if (userProfileView && payload?.success) {
             const { user } = payload;
             setModalData(search(postId, user.posts));
@@ -407,9 +405,7 @@ function Post({
             );
             dispatch(getAllPost());
 
-            const { payload } = await dispatch(
-                getUserProfile({ userId: data?.user?._id })
-            );
+            const { payload } = await dispatch(getUserProfile({ userId }));
             if (userProfileView && payload?.success) {
                 const { user } = payload;
                 setModalData(search(postId, user.posts));
@@ -432,9 +428,7 @@ function Post({
             console.log('caption', formData.caption);
             dispatch(updatePost({ content: formData.caption, postId }));
             dispatch(getAllPost());
-            const { payload } = await dispatch(
-                getUserProfile({ userId: data?.user?._id })
-            );
+            const { payload } = await dispatch(getUserProfile({ userId }));
             if (userProfileView && payload?.success) {
                 const { user } = payload;
                 setModalData(search(postId, user.posts));
