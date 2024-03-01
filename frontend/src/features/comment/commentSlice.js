@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 
 const initialState = {
     comments: [],
+    status: 'idle',
 };
 export const getAllComments = createAsyncThunk(
     'comment/getAllComments',
@@ -71,7 +72,11 @@ const commentSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(getAllComments.pending, (state) => {
+                state.status = 'loading';
+            })
             .addCase(getAllComments.fulfilled, (state, action) => {
+                state.status = 'Idle';
                 state.comments = action.payload.comments;
             })
             .addCase(deleteComment.fulfilled, (state, action) => {
@@ -85,5 +90,6 @@ const commentSlice = createSlice({
 });
 
 export const selectComments = (state) => state.comment.comments;
+export const selectCommentStatus = (state) => state.comment.status;
 export const { setComments } = commentSlice.actions;
 export default commentSlice.reducer;

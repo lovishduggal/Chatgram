@@ -91,6 +91,11 @@ const handleGetUserProfile = catchAsyncError(async (req, res, next) => {
     return res.status(200).json({ success: true, user });
 });
 
+const handleGetAllUsers = catchAsyncError(async (req, res, next) => {
+    const users = await User.find();
+    return res.status(200).json({ success: true, users });
+});
+
 const handleGetUserNotifications = catchAsyncError(async (req, res, next) => {
     const userId = req.params.userId;
     let user = await User.findOneAndUpdate(
@@ -151,4 +156,5 @@ export {
     handleGetUserProfile,
     handleUpdateUserProfile,
     handleGetUserNotifications,
+    handleGetAllUsers,
 };

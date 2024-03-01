@@ -32,6 +32,7 @@ import {
     createComment,
     deleteComment,
     getAllComments,
+    selectCommentStatus,
     selectComments,
     setComments,
 } from '../../comment/commentSlice';
@@ -199,6 +200,7 @@ function ListOfComments({
     otherUserProfileView = false,
 }) {
     const comments = useSelector(selectComments);
+    const commentStatus = useSelector(selectCommentStatus);
     const userId = useSelector(selectUserId);
     const dispatch = useDispatch();
 
@@ -236,7 +238,12 @@ function ListOfComments({
                 '& ul': { padding: 0 },
             }}>
             <ListSubheader>{`Post's comments`}</ListSubheader>
-            {comments && comments.length > 0 ? (
+            {commentStatus === 'loading' ? (
+                <CircularProgress
+                    sx={{ translate: '110px 0px' }}
+                    variant="indeterminate"
+                />
+            ) : comments && comments.length > 0 ? (
                 comments.map((comment) => (
                     <ListItem
                         key={comment?._id}
@@ -297,10 +304,9 @@ function ListOfComments({
                     </ListItem>
                 ))
             ) : (
-                <CircularProgress
-                    sx={{ translate: '110px 0px' }}
-                    variant="indeterminate"
-                />
+                <Typography textAlign={'center'}>
+                    No comments found on this post
+                </Typography>
             )}
         </List>
     );

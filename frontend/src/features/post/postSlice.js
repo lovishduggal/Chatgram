@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 
 const initialState = {
     posts: [],
+    status: 'idle',
 };
 export const getAllPost = createAsyncThunk('post/getAllPosts', async () => {
     try {
@@ -58,14 +59,18 @@ export const deletePost = createAsyncThunk('post/deletePost', async (data) => {
         toast.error(error.response.data.message);
     }
 });
+
 const postSlice = createSlice({
     name: 'post',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
         builder
+            .addCase(getAllPost.pending, (state) => {
+                state.status = 'loading';
+            })
             .addCase(getAllPost.fulfilled, (state, action) => {
-                state.isLoading = true;
+                state.status = 'idle';
                 state.posts = action.payload.posts;
             })
             .addCase(uploadPost.fulfilled, (state, action) => {
@@ -88,4 +93,5 @@ const postSlice = createSlice({
 });
 
 export const selectPosts = (state) => state.post.posts;
+export const selectPostStatus = (state) => state.post.status;
 export default postSlice.reducer;
