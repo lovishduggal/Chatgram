@@ -110,8 +110,12 @@ const userSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(getUserProfile.pending, (state) => {
+                state.status = 'loading';
+            })
             .addCase(getUserProfile.fulfilled, (state, action) => {
-                state.user = action.payload.user;
+                state.status = 'idle';
+                state.user = action?.payload?.user;
             })
             .addCase(getUserNotifications.pending, (state) => {
                 state.status = 'loading';

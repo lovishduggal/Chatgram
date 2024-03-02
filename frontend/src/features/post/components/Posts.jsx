@@ -1,12 +1,11 @@
-import { CircularProgress, Stack, Toolbar, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import Post from './Post';
 import { useSelector } from 'react-redux';
-import { selectPostStatus, selectPosts } from '../postSlice';
+import { selectPosts } from '../postSlice';
 import { selectUserId } from '../../auth/authSlice';
 
 function Posts() {
     const posts = useSelector(selectPosts);
-    const postStatus = useSelector(selectPostStatus);
     const loggedInUserId = useSelector(selectUserId);
 
     function search(loggedInUserId, arrOfObjsLikes) {
@@ -19,12 +18,7 @@ function Posts() {
     }
     return (
         <Stack justifyContent="center" alignItems="center">
-            {postStatus === 'loading' ? (
-                <>
-                    <Toolbar />
-                    <CircularProgress variant="indeterminate" />
-                </>
-            ) : posts && posts?.length > 0 ? (
+            {posts && posts?.length > 0 ? (
                 posts.map((post) => (
                     <Post
                         key={post._id}

@@ -100,7 +100,10 @@ function OtherUserProfile() {
     return (
         <>
             {otherUser ? (
-                <Box bgcolor={'background.default'} color={'text.primary'}>
+                <Box
+                    bgcolor={'background.default'}
+                    color={'text.primary'}
+                    sx={{ height: 'calc(100vh - 80px)' }}>
                     <Stack
                         sx={{
                             margin: 2,

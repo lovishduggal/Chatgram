@@ -8,9 +8,9 @@ import LogInPage from './pages/LogInPage.jsx';
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+    checkLoggedIn,
     selectLoggedInUser,
     selectUserId,
-    setUser,
 } from './features/auth/authSlice.js';
 import RequireAuth from './features/auth/components/RequireAuth.jsx';
 import Home from './pages/Home.jsx';
@@ -96,26 +96,23 @@ function App() {
     const userId = useSelector(selectUserId);
 
     useEffect(() => {
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        const jwt = localStorage.getItem('jwt');
-        const userId = localStorage.getItem('userId');
         const mode = localStorage.getItem('mode');
-        if (isLoggedIn && jwt && userId) {
-            dispatch(setUser({ isLoggedIn, jwt, userId }));
-            dispatch(setMode({ mode }));
-        }
+        dispatch(setMode({ mode }));
+        (async () => {
+            await dispatch(checkLoggedIn());
+        })();
     }, []);
 
     useEffect(() => {
         if (isLoggedIn && userId) {
             dispatch(getAllPost());
             dispatch(getUserProfile({ userId }));
+            console.log('hii');
         }
     }, [isLoggedIn, dispatch, userId]);
 
     return (
         <div className="app">
-            {' '}
             <ThemeProvider theme={theme}>
                 <Box bgcolor={'background.default'} color={'text.primary'}>
                     <CssBaseline />

@@ -111,7 +111,9 @@ function SearchBar() {
                 user.fullName.toLowerCase().includes(value)
         );
         setResults(results);
-        setIsLoading(false);
+        if ((results && results.length > 0) || value.length === 0)
+            setIsLoading(false);
+        else setIsLoading(null); //* No such user found..
     }
 
     const handleChange = (value) => {
@@ -125,7 +127,7 @@ function SearchBar() {
     }, 500);
 
     return (
-        <Box sx={{ width: '100%', height: '80vh' }}>
+        <Box sx={{ width: '100%', height: 'calc(100vh - 64px)' }}>
             <Stack
                 justifyContent={'center'}
                 flexDirection={'row'}
@@ -154,11 +156,16 @@ function SearchBar() {
                             sx={{ textAlign: 'center' }}>
                             <CircularProgress />
                         </Typography>
+                    ) : results && results.length > 0 ? (
+                        <ListOfUsers results={results}></ListOfUsers>
                     ) : (
-                        results &&
-                        results.length > 0 && (
-                            <ListOfUsers results={results}></ListOfUsers>
-                        )
+                        isLoading === null && (
+                            <Typography
+                                color="text.primary"
+                                sx={{ textAlign: 'center' }}>
+                                No such user found
+                            </Typography>
+                        ) //* No such user found..
                     )}
                 </Box>
             </Stack>

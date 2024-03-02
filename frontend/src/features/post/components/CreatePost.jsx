@@ -5,7 +5,6 @@ import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {
-    Box,
     Button,
     CardActionArea,
     CardActions,
@@ -72,7 +71,7 @@ function CreatePost() {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: '100vh',
+                height: 'calc(100vh - 64px)',
             }}>
             <Card
                 component={'form'}

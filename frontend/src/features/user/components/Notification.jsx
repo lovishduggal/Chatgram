@@ -33,7 +33,7 @@ function Notification() {
         }
     }, []);
     return (
-        <Stack alignItems={'center'} sx={{ width: 1, height: '100vh' }}>
+        <Stack alignItems={'center'} sx={{ width: 1, height: 'calc(100vh - 64px)' }}>
             <Stack>
                 {userStatus === 'loading' ? (
                     <>

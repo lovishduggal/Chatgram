@@ -34,10 +34,17 @@ export const uploadPost = createAsyncThunk('post/uploadPost', async (data) => {
 export const updatePost = createAsyncThunk('post/updatePost', async (data) => {
     const { content, postId } = data;
     try {
-        const response = await axiosInstance.put(`/post/${postId}`, {
+        const response = axiosInstance.put(`/post/${postId}`, {
             content,
         });
-        return response.data;
+        toast.promise(response, {
+            loading: 'Updating...',
+            success: (response) => {
+                return response?.data?.message;
+            },
+            error: 'Failed to update the post',
+        });
+        return (await response).data;
     } catch (error) {
         toast.error(error.response.data.message);
     }

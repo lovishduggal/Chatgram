@@ -432,7 +432,7 @@ function Post({
             reset();
         } else if (caption) {
             console.log('caption', formData.caption);
-            dispatch(updatePost({ content: formData.caption, postId }));
+            await dispatch(updatePost({ content: formData.caption, postId }));
             dispatch(getAllPost());
             const { payload } = await dispatch(getUserProfile({ userId }));
             if (userProfileView && payload?.success) {
