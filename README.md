@@ -12,6 +12,7 @@ This web application allows users to create, view, and edit pictograms. Pictogra
 - **Search:** Users can search for other users.
 - **Like/Unlike:** Express appreciation for pictograms by liking them. Undo likes with the unlike.
 - **Follow/Unfollow:** Connect with other users by following them. Unfollow to remove the connection.
+- **Notifications:** Receive Notifications when someone starts following you.
 - **Comment:** Leave textual responses to pictograms. Remove your own comments on pictograms.
 - **User Management: M**anage and update profile details.
 
